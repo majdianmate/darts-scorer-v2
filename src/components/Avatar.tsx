@@ -9,8 +9,7 @@ export interface AvatarProps {
 }
 
 const Avatar: FC<AvatarProps> = ({ name, image, size = "md", className = "" }) => {
-  const [hasError, setHasError] = useState(false);
-
+  console.log(image);
   // Méretek definiálása
   const sizeClasses = {
     xs: "h-5 w-5 text-[9px]",
@@ -26,13 +25,12 @@ const Avatar: FC<AvatarProps> = ({ name, image, size = "md", className = "" }) =
     <div 
       className={`relative flex shrink-0 overflow-hidden rounded-full border bg-muted shadow-sm ${sizeClasses[size]} ${className}`}
     >
-      {image && !hasError ? (
+      {image ? (
         <img
           src={image || undefined}
           alt={name || "User avatar"}
           referrerPolicy="no-referrer" // <--- EZ KELL A GOOGLE KÉPHEZ
           className="h-full w-full object-cover"
-          onError={() => setHasError(true)} // Ha mégis elszállna, átvált monogramra
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center font-semibold bg-secondary text-secondary-foreground">

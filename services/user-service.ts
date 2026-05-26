@@ -152,7 +152,7 @@ export async function searchUsersService(searchTerm: string): Promise<User[]> {
     // 2. Beállítjuk a MiniSearch-et
     const miniSearch = new MiniSearch({
         fields: ['name', 'username', 'email'], // ezekben a mezőkben fog keresni
-        storeFields: ['name', 'username', 'email', 'photoURL'], // ezeket adja vissza a találatnál
+        storeFields: ['name', 'username', 'email', 'image'], // ezeket adja vissza a találatnál
         searchOptions: {
             prefix: true, // engedélyezi a szó eleji egyezést (kri -> kristof)
             fuzzy: 0.2    // engedélyezi az apró elütéseket (pl. kristóf -> kristof)
@@ -164,6 +164,7 @@ export async function searchUsersService(searchTerm: string): Promise<User[]> {
 
     // 4. Keresés
     const results = miniSearch.search(searchTerm);
+    console.log('results', results);
 
     // 5. Visszaalakítjuk a formátumot a te User típusodra
     return results.map(result => ({
@@ -171,7 +172,7 @@ export async function searchUsersService(searchTerm: string): Promise<User[]> {
         name: result.name,
         username: result.username,
         email: result.email,
-        image: result.photoURL,
+        image: result.image,
         createdAt: result.createdAt,
         updatedAt: result.updatedAt
     } as User));

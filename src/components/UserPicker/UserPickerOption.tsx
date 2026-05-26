@@ -19,7 +19,7 @@ const UserPickerOption = ({
   disabled = false,
 }: UserPickerOptionProps) => {
   const isInteractionDisabled = disabled || isLocked
-
+  console.log(user)
   return (
     <button
       type="button"
