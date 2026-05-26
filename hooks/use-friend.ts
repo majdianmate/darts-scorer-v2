@@ -1,5 +1,6 @@
+import { useState } from "react";
 import {
-    createFriendshipService,
+    createFriendshipsServices,
     deleteFriendshipService,
     getFriendsService,
   } from "../services/friend-service";
@@ -9,6 +10,7 @@ import {
   
   export const useFriends = (userId: string) => {
     const queryClient = useQueryClient();
+    const [deletingFriendshipId, setDeletingFriendshipId] = useState<string | null>(null);
   
     const getFriends = useQuery({
       queryKey: ["get-friends", userId],
@@ -16,28 +18,39 @@ import {
       enabled: !!userId,
     });
 
-    const addFriend = useMutation({
-        mutationFn: (friendship: FriendshipDoc) =>
-          createFriendshipService(friendship),
+    const addFriends = useMutation({
+        mutationFn: (friendships: FriendshipDoc[]) =>
+            createFriendshipsServices(friendships),
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["get-friends"] });
           queryClient.invalidateQueries({ queryKey: ["get-pending-requests"] });
           queryClient.invalidateQueries({ queryKey: ["get-blocked-friends"] });
+          
+          toast.success("Friends added successfully!");
         },
         onError: (error) => {
           toast.error(error.message);
         },
       });
   
-    const deleteFriend = useMutation({
-      mutationFn: (friendshipId: string) => deleteFriendshipService(friendshipId),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["get-friends"] });
-      },
-      onError: (error) => {
-        toast.error(error.message);
-      },
-    });
+      const deleteFriendMutation = useMutation({
+        mutationFn: (friendshipId: string) => {
+          if (!friendshipId) {
+            throw new Error('Friendship ID is missing')
+          }
+          setDeletingFriendshipId(friendshipId)
+          return deleteFriendshipService(friendshipId)
+        },
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["get-friends"] });
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+        onSettled: () => {
+          setDeletingFriendshipId(null);
+        },
+      });
   
     return {
       friends: getFriends.data ?? [],
@@ -45,8 +58,9 @@ import {
       isGetFriendsError: getFriends.isError,
       isGetFriendsSuccess: getFriends.isSuccess,
   
-      addFriend: addFriend.mutate,
+      addFriends: addFriends.mutate,
   
-      deleteFriend: deleteFriend.mutateAsync,
+      deleteFriend: deleteFriendMutation.mutate,
+      deletingFriendshipId: deletingFriendshipId,
     };
   };

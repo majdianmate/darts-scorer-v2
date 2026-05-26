@@ -1,5 +1,6 @@
 import type { AuthCredentials, User } from "../types/user-types";
 import { auth, db } from "@/lib/firebase";
+import MiniSearch from 'minisearch';
 import {
   collection,
   deleteDoc,
@@ -137,35 +138,41 @@ export const getUsersData = async (userIds: string[]): Promise<Record<string, Us
 }
 
 export async function searchUsersService(searchTerm: string): Promise<User[]> {
-    // 1. Minimum 3 betű check
     if (!searchTerm || searchTerm.length < 3) return [];
 
-    const term = searchTerm.toLowerCase();
+    // 1. Lekérjük az összes felhasználót a Firestore-ból
+    // Tipp: Ezt érdemes lehet cache-elni egy változóba, hogy ne fusson le minden leütésnél!
     const usersRef = collection(db, "users");
+    const snapshot = await getDocs(usersRef);
+    const allUsers = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    })) as User[];
 
-    // 2. Firestore prefix keresés trükk: 
-    // Keressük azokat, amik a 'term'-mel kezdődnek, 
-    // és kisebbek, mint a term + egy záró karakter (\uf8ff)
-    const endTerm = term + "\uf8ff";
-
-    // Külön query-k, mert a Firestore nem tud "OR" feltételt különböző mezőkre komplexen
-    const queries = [
-        query(usersRef, where("username", ">=", term), where("username", "<=", endTerm)),
-        query(usersRef, where("name", ">=", term), where("name", "<=", endTerm)),
-        query(usersRef, where("email", ">=", term), where("email", "<=", endTerm))
-    ];
-
-    // 3. Lekérjük mindet párhuzamosan
-    const snapshots = await Promise.all(queries.map(q => getDocs(q)));
-    
-    const resultsMap: Record<string, User> = {};
-
-    // 4. Összefésülés (hogy ne legyen duplikáció, ha vki neve és username-je is egyezik)
-    snapshots.forEach(snap => {
-      snap.forEach(doc => {
-        resultsMap[doc.id] = { id: doc.id, ...doc.data() } as User;
-      });
+    // 2. Beállítjuk a MiniSearch-et
+    const miniSearch = new MiniSearch({
+        fields: ['name', 'username', 'email'], // ezekben a mezőkben fog keresni
+        storeFields: ['name', 'username', 'email', 'photoURL'], // ezeket adja vissza a találatnál
+        searchOptions: {
+            prefix: true, // engedélyezi a szó eleji egyezést (kri -> kristof)
+            fuzzy: 0.2    // engedélyezi az apró elütéseket (pl. kristóf -> kristof)
+        }
     });
 
-    return Object.values(resultsMap);
+    // 3. Betöltjük az adatokat
+    miniSearch.addAll(allUsers);
+
+    // 4. Keresés
+    const results = miniSearch.search(searchTerm);
+
+    // 5. Visszaalakítjuk a formátumot a te User típusodra
+    return results.map(result => ({
+        id: result.id,
+        name: result.name,
+        username: result.username,
+        email: result.email,
+        image: result.photoURL,
+        createdAt: result.createdAt,
+        updatedAt: result.updatedAt
+    } as User));
 }

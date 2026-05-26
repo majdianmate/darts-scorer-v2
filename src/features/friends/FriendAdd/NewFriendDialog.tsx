@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -13,10 +14,12 @@ import { useFriends } from '../../../../hooks/use-friend'
 import { useUser } from '../../../../hooks/use-user'
 import { searchUsersService } from '../../../../services/user-service'
 import type { User } from '../../../../types/user-types'
+import { FriendshipStatus, type FriendshipDoc } from '../../../../types/friend-types'
+import { serverTimestamp, Timestamp } from 'firebase/firestore'
 
 const NewFriendDialog = () => {
-  const { user } = useUser()
-  const { friends } = useFriends(user?.id ?? '')
+  const { user: currentUser } = useUser()
+  const { friends, addFriends } = useFriends(currentUser?.id ?? '')
   const [selectedUsers, setSelectedUsers] = useState<User[]>([])
 
   const existingFriends = useMemo(
@@ -30,10 +33,26 @@ const NewFriendDialog = () => {
   )
 
   useEffect(() => {
-    setSelectedUsers(existingFriends)
-  }, [existingFriends])
+    
+  }, [existingFriends]);
 
-  const excludeUserIds = user ? [user.id] : []
+  const excludeUserIds = currentUser ? [currentUser.id] : [];
+
+  const handleAddFriends = () => {
+    if (!currentUser) return;
+
+    const newFriendships: FriendshipDoc[] = selectedUsers.map((user) => ({
+      senderId: currentUser?.id,
+      receiverId: user.id,
+      status: FriendshipStatus.PENDING,
+      createdAt: serverTimestamp() as Timestamp,
+      updatedAt: serverTimestamp() as Timestamp,
+      userIds: [user.id, user.id],
+    }));
+
+    addFriends(newFriendships);
+    console.log(newFriendships);
+  }
 
   return (
     <Dialog>
@@ -52,6 +71,9 @@ const NewFriendDialog = () => {
           excludeUserIds={excludeUserIds}
           lockedUserIds={lockedUserIds}
         />
+        <DialogFooter>
+        <Button onClick={handleAddFriends} disabled={selectedUsers.length === 0}>Add Friends</Button>
+      </DialogFooter>
       </DialogContent>
     </Dialog>
   )

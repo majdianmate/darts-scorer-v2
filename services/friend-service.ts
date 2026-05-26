@@ -19,6 +19,12 @@ import {
   
   import { db } from "@/lib/firebase";
   import { getUserData, getUsersData } from "./user-service";
+
+  export const createFriendshipsServices = async (friendships: FriendshipDoc[]) => {
+    for (const friendship of friendships) {
+      await createFriendshipService(friendship);
+    }
+  }
   
   export const createFriendshipService = async (friendship: FriendshipDoc) => {
     const friendshipId = friendship.senderId + "_" + friendship.receiverId;

@@ -12,6 +12,7 @@ import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 import { GravityStarsBackground } from '#/components/animate-ui/components/backgrounds/gravity-stars'
+import { Toaster } from 'sonner'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -49,6 +50,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="bg-background flex justify-center items-center h-screen relative">
         {children}
+        <Toaster />
         <GravityStarsBackground className="absolute inset-0 -z-10000" />
         <TanStackDevtools
           config={{

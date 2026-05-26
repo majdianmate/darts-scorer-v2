@@ -2,15 +2,15 @@ import FriendCard from './FriendCard/FriendCard'
 import { useFriends } from '../../../hooks/use-friend'
 import { useUser } from '../../../hooks/use-user'
 import NewFriendDialog from './FriendAdd/NewFriendDialog'
+import { ScrollArea } from '#/components/ui/scroll-area'
 
 const Friends = () => {
   const { user } = useUser()
-  const { friends, deleteFriend, isGetFriendsLoading } = useFriends(user?.id ?? '')
+  const { friends, deleteFriend, isGetFriendsLoading, deletingFriendshipId } =
+    useFriends(user?.id ?? '')
 
   if (isGetFriendsLoading) {
-    return (
-      <p className="text-sm text-muted-foreground">Loading friends…</p>
-    )
+    return <p className="text-sm text-muted-foreground">Loading friends…</p>
   }
 
   if (friends.length === 0) {
@@ -31,19 +31,22 @@ const Friends = () => {
 
   return (
     <div className="flex flex-col gap-4">
-        <div className='flex justify-end'>
-            <NewFriendDialog />
-        </div>
-      <div className='grid gap-3 sm:grid-cols-2'>
-      {friends.map(({ friend, friendship }) => (
-        <FriendCard
-          key={friendship.id}
-          friend={friend}
-          friendship={friendship}
-          onRemove={() => deleteFriend(friendship.id)}
-        />
-      ))}
+      <div className="flex justify-end">
+        <NewFriendDialog />
       </div>
+      <ScrollArea className="h-[calc(100vh-100px)] [scrollbar-gutter:stable] overflow-y-hidden pr-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {friends.map(({ friend, friendship }) => (
+            <FriendCard
+              key={friendship.id}
+              friend={friend}
+              friendship={friendship}
+              onRemove={() => deleteFriend(friendship.id)}
+              isRemoving={deletingFriendshipId === friendship.id}
+            />
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   )
 }
