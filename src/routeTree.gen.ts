@@ -10,19 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as dashboardDashboardRouteImport } from './routes/(dashboard)/dashboard'
+import { Route as protectedLayoutRouteImport } from './routes/(protected)/_layout'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as protectedLayoutFriendsRouteImport } from './routes/(protected)/_layout.friends'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const dashboardDashboardRoute = dashboardDashboardRouteImport.update({
-  id: '/(dashboard)/dashboard',
-  path: '/dashboard',
+const protectedLayoutRoute = protectedLayoutRouteImport.update({
+  id: '/(protected)/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authSignUpRoute = authSignUpRouteImport.update({
@@ -40,20 +40,25 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const protectedLayoutFriendsRoute = protectedLayoutFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => protectedLayoutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/dashboard': typeof dashboardDashboardRoute
+  '/friends': typeof protectedLayoutFriendsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/dashboard': typeof dashboardDashboardRoute
+  '/friends': typeof protectedLayoutFriendsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,20 +66,22 @@ export interface FileRoutesById {
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
-  '/(dashboard)/dashboard': typeof dashboardDashboardRoute
+  '/(protected)/_layout': typeof protectedLayoutRouteWithChildren
+  '/(protected)/_layout/friends': typeof protectedLayoutFriendsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/dashboard'
+  fullPaths: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/friends'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/dashboard'
+  to: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/friends'
   id:
     | '__root__'
     | '/'
     | '/(auth)/forgot-password'
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
-    | '/(dashboard)/dashboard'
+    | '/(protected)/_layout'
+    | '/(protected)/_layout/friends'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -82,7 +89,7 @@ export interface RootRouteChildren {
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authSignInRoute: typeof authSignInRoute
   authSignUpRoute: typeof authSignUpRoute
-  dashboardDashboardRoute: typeof dashboardDashboardRoute
+  protectedLayoutRoute: typeof protectedLayoutRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -94,11 +101,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(dashboard)/dashboard': {
-      id: '/(dashboard)/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof dashboardDashboardRouteImport
+    '/(protected)/_layout': {
+      id: '/(protected)/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof protectedLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/sign-up': {
@@ -122,15 +129,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(protected)/_layout/friends': {
+      id: '/(protected)/_layout/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof protectedLayoutFriendsRouteImport
+      parentRoute: typeof protectedLayoutRoute
+    }
   }
 }
+
+interface protectedLayoutRouteChildren {
+  protectedLayoutFriendsRoute: typeof protectedLayoutFriendsRoute
+}
+
+const protectedLayoutRouteChildren: protectedLayoutRouteChildren = {
+  protectedLayoutFriendsRoute: protectedLayoutFriendsRoute,
+}
+
+const protectedLayoutRouteWithChildren = protectedLayoutRoute._addFileChildren(
+  protectedLayoutRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,
-  dashboardDashboardRoute: dashboardDashboardRoute,
+  protectedLayoutRoute: protectedLayoutRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
