@@ -1,7 +1,7 @@
 import { type FC } from 'react'
 import type { Club } from '../../../../types/club-types'
 import type { DropdownOption } from '#/components/Dropdown/DropdownComponent'
-import { MoreVertical, Pencil, Trash2, UserCog } from 'lucide-react'
+import { MoreVertical, Pencil, Trash2, UserCog, Users } from 'lucide-react'
 import DropdownComponent from '#/components/Dropdown/DropdownComponent'
 import { useUser } from '../../../../hooks/use-user'
 
@@ -10,6 +10,7 @@ interface ClubDropdownProps {
   onEdit?: () => void
   onRemove?: () => void
   onManageMembers?: () => void
+  onCreateSquad?: () => void
 }
 
 const ClubDropdown: FC<ClubDropdownProps> = ({
@@ -17,6 +18,7 @@ const ClubDropdown: FC<ClubDropdownProps> = ({
   onRemove,
   onManageMembers,
   onEdit,
+  onCreateSquad,
 }) => {
   const { user } = useUser()
   const isOwner = user?.id === club.createdBy.id
@@ -27,6 +29,11 @@ const ClubDropdown: FC<ClubDropdownProps> = ({
       icon: Pencil,
       onClick: () => onEdit?.(),
       render: isOwner,
+    },
+    {
+        label: 'Create Squad',
+        icon: Users,
+        onClick: () => onCreateSquad?.(),
     },
     {
       label: 'Manage members',

@@ -11,6 +11,7 @@ import {
     Timestamp,
     serverTimestamp,
     setDoc,
+    writeBatch,
   } from "firebase/firestore";
   import { db } from "@/lib/firebase";
   import type { User } from "../types/user-types";
@@ -22,6 +23,10 @@ import {
     ClubRole,
     ClubMemberStatus,
     type ClubInvite,
+    type Squad,
+    type SquadDoc,
+    type SquadMember,
+    type SquadMemberDoc,
   } from "../types/club-types";
   
   // ---------------------------------------------------------------------------
@@ -30,6 +35,8 @@ import {
   
   const clubsRef = () => collection(db, "clubs");
   const clubMembersRef = () => collection(db, "clubMembers");
+  const squadsRef = () => collection(db, "squads");
+  const squadMembersRef = () => collection(db, "squadMembers");
   const clubRef = (clubId: string) => doc(db, "clubs", clubId);
   
   // ---------------------------------------------------------------------------
@@ -105,16 +112,112 @@ import {
       invitedBy: m.invitedById ? (userMap.get(m.invitedById) ?? null) : null,
     }));
   }
+
+  async function assertCanManageSquads(
+    clubId: string,
+    currentUserId: string,
+  ): Promise<void> {
+    const roleSnap = await getDocs(
+      query(
+        clubMembersRef(),
+        where("clubId", "==", clubId),
+        where("userId", "==", currentUserId),
+        where("status", "==", ClubMemberStatus.ACCEPTED),
+      ),
+    );
+
+    if (roleSnap.empty) {
+      throw new Error("You are not a member of this club.");
+    }
+
+    const role = roleSnap.docs[0].data() as ClubMemberDoc;
+    if (role.role !== ClubRole.LEADER && role.role !== ClubRole.CAPTAIN) {
+      throw new Error("Only leaders and captains can manage squads.");
+    }
+  }
+
+  async function fetchSquadMembers(
+    squadId: string,
+    clubId: string,
+  ): Promise<SquadMember[]> {
+    const q = query(
+      squadMembersRef(),
+      where("squadId", "==", squadId),
+      where("clubId", "==", clubId),
+    );
+    const snap = await getDocs(q);
+
+    if (snap.empty) return [];
+
+    const raw = snap.docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as SquadMemberDoc),
+    }));
+
+    const addedByMap = await fetchUsers(
+      [...new Set(raw.map((s) => s.addedById))],
+    );
+
+    return raw.map((sm) => ({
+      ...sm,
+      addedBy: addedByMap.get(sm.addedById)!,
+      member: {
+        ...sm.member,
+        id: sm.member.id ?? sm.membershipId,
+        user:
+          sm.member.user ??
+          createGuestDisplayUser(
+            sm.member.guestName ?? "Guest",
+            sm.member.joinCode,
+          ),
+        invitedBy: sm.member.invitedBy ?? null,
+      },
+    }));
+  }
+
+  export async function getSquads(clubId: string): Promise<Squad[]> {
+    const q = query(squadsRef(), where("clubId", "==", clubId));
+    const snap = await getDocs(q);
+
+    if (snap.empty) return [];
+
+    return Promise.all(
+      snap.docs.map(async (squadDoc) => {
+        const data = squadDoc.data() as SquadDoc;
+        const squadId = squadDoc.id;
+
+        const [createdBy, members] = await Promise.all([
+          fetchUser(data.createdById),
+          fetchSquadMembers(squadId, clubId),
+        ]);
+
+        return {
+          id: squadId,
+          clubId: data.clubId,
+          name: data.name,
+          color: data.color,
+          icon: data.icon,
+          createdById: data.createdById,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          memberIds: members.map((m) => m.membershipId),
+          createdBy,
+          members,
+        };
+      }),
+    );
+  }
   
   // ---------------------------------------------------------------------------
   // CRUD
   // ---------------------------------------------------------------------------
   
   export async function getClub(clubId: string): Promise<Club> {
-    const [clubSnap, members, invitations] = await Promise.all([
+    const [clubSnap, members, invitations, squads] = await Promise.all([
       getDoc(clubRef(clubId)),
       fetchClubMembersByStatus(clubId, ClubMemberStatus.ACCEPTED),
       fetchClubMembersByStatus(clubId, ClubMemberStatus.PENDING),
+      getSquads(clubId),
     ]);
   
     if (!clubSnap.exists()) throw new Error(`Club not found: ${clubId}`);
@@ -128,6 +231,7 @@ import {
       createdBy,
       members,
       invitations,
+      squads,
     };
   }
   
@@ -533,3 +637,132 @@ import {
   
     await deleteDoc(memberRef);
   }
+
+  export async function createSquadService(
+    clubId: string,
+    createdBy: User,
+    data: { name: string; color: string; icon: string; members?: ClubMember[] }
+  ) {
+    const batch = writeBatch(db);
+    
+    // 1. Squad dokumentum létrehozása
+    const squadRef = doc(collection(db, "squads"));
+    const squadId = squadRef.id;
+    
+    batch.set(squadRef, {
+      clubId,
+      name: data.name,
+      color: data.color,
+      icon: data.icon,
+      createdBy,
+      createdById: createdBy.id,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  
+    // 2. Tagok hozzáadása (ha vannak) - Max 5 fő limitet a UI-on is kezeljük!
+    if (data.members && data.members.length > 0) {
+      const limitedMembers = data.members.slice(0, 5);
+      limitedMembers.forEach((member) => {
+        const smRef = doc(collection(db, "squadMembers"));
+        batch.set(smRef, {
+          squadId,
+          clubId,
+          member: member,
+          membershipId: member.id,
+          addedById: createdBy.id,
+          addedAt: serverTimestamp(),
+        });
+      });
+    }
+  
+    await batch.commit();
+    return squadId;
+  }
+
+  export async function updateSquadService(
+    squadId: string,
+    clubId: string,
+    currentUserId: string,
+    data: Partial<Pick<SquadDoc, "name" | "color" | "icon">>,
+  ): Promise<void> {
+    await assertCanManageSquads(clubId, currentUserId);
+
+    const squadRef = doc(db, "squads", squadId);
+    const squadSnap = await getDoc(squadRef);
+
+    if (!squadSnap.exists()) {
+      throw new Error("Squad not found.");
+    }
+
+    const squadData = squadSnap.data() as SquadDoc;
+    if (squadData.clubId !== clubId) {
+      throw new Error("Squad does not belong to this club.");
+    }
+
+    const updates: Record<string, unknown> = {
+      updatedAt: serverTimestamp(),
+    };
+
+    if (data.name !== undefined) {
+      const trimmedName = data.name.trim();
+      if (!trimmedName) {
+        throw new Error("Squad name is required.");
+      }
+      updates.name = trimmedName;
+    }
+    if (data.color !== undefined) updates.color = data.color;
+    if (data.icon !== undefined) updates.icon = data.icon;
+
+    await updateDoc(squadRef, updates);
+  }
+
+  export async function deleteSquadService(
+    squadId: string,
+    clubId: string,
+    currentUserId: string,
+  ): Promise<void> {
+    await assertCanManageSquads(clubId, currentUserId);
+
+    const squadRef = doc(db, "squads", squadId);
+    const squadSnap = await getDoc(squadRef);
+
+    if (!squadSnap.exists()) {
+      throw new Error("Squad not found.");
+    }
+
+    const squadData = squadSnap.data() as SquadDoc;
+    if (squadData.clubId !== clubId) {
+      throw new Error("Squad does not belong to this club.");
+    }
+
+    const membersSnap = await getDocs(
+      query(
+        squadMembersRef(),
+        where("squadId", "==", squadId),
+        where("clubId", "==", clubId),
+      ),
+    );
+
+    const batch = writeBatch(db);
+    membersSnap.docs.forEach((memberDoc) => batch.delete(memberDoc.ref));
+    batch.delete(squadRef);
+    await batch.commit();
+  }
+
+  export async function removeSquadMemberService(
+    squadMemberId: string,
+    currentUserId: string,
+  ): Promise<void> {
+    const squadMemberRef = doc(db, "squadMembers", squadMemberId);
+    const squadMemberSnap = await getDoc(squadMemberRef);
+
+    if (!squadMemberSnap.exists()) {
+      throw new Error("Squad member not found.");
+    }
+
+    const { clubId } = squadMemberSnap.data() as SquadMemberDoc;
+    await assertCanManageSquads(clubId, currentUserId);
+    await deleteDoc(squadMemberRef);
+  }
+  

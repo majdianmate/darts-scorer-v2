@@ -2,6 +2,7 @@ import { type FC } from 'react'
 import type { Club } from '../../../../types/club-types'
 import ClubCardMembers from './ClubCardMembers'
 import ClubCardInvitations from './ClubCardInvitations'
+import ClubCardSquads from './ClubCardSquads'
 import {
   Card,
   CardAction,
@@ -34,6 +35,11 @@ const ClubCard: FC<ClubCardProps> = ({ club }) => {
     setDialog('editClub', true)
   }
 
+  const onCreateSquad = () => {
+    setTargetClubId(club.id)
+    setDialog('createSquad', true)
+  }
+
   return (
     <Card className="flex h-full flex-col">
       <CardHeader>
@@ -44,6 +50,7 @@ const ClubCard: FC<ClubCardProps> = ({ club }) => {
             onRemove={() => deleteClub()}
             onManageMembers={onManageMembers}
             onEdit={onEdit}
+            onCreateSquad={onCreateSquad}
           />
         </CardAction>
         <CardDescription className="line-clamp-2 min-h-10">
@@ -57,6 +64,7 @@ const ClubCard: FC<ClubCardProps> = ({ club }) => {
           invitations={club.invitations}
           clubId={club.id}
         />
+        <ClubCardSquads squads={club.squads} clubId={club.id} />
       </CardContent>
 
       <CardFooter className="mt-auto border-t border-border/60 bg-transparent p-4 pt-3">

@@ -8,10 +8,14 @@ import ClubCard from './ClubCard/ClubCard'
 import ClubInvites from './ClubInvites/ClubInvites'
 import MemberManagerDialog from './MemberManager/MemberManagerDialog'
 import ClubEditor from './ClubEditor/ClubEditor'
+import SquadCreator from './SquadSystem/SquadCreator/SquadCreator'
+import SquadEditor from './SquadSystem/SquadEditor/SquadEditor'
 
 const Clubs = () => {
   const { user } = useUser()
-  const { clubs, isGetClubsLoading } = useClubs(user)
+  const { clubs, isGetClubsLoading } = useClubs(user);
+
+  console.log(clubs);
 
   if (!user) {
     return (
@@ -73,7 +77,7 @@ const Clubs = () => {
         </div>
       ) : (
         <ScrollArea className="h-[calc(100vh-100px)] [scrollbar-gutter:stable] pr-4">
-          <div className="grid grid-cols-1 gap-4 pb-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 p-2">
+          <div className="grid grid-cols-1 gap-4 pb-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 p-2">
             {clubs.map((club) => (
               <ClubCard key={club.id} club={club} />
             ))}
@@ -83,6 +87,8 @@ const Clubs = () => {
 
       <MemberManagerDialog />
       <ClubEditor />
+      <SquadCreator />
+      <SquadEditor />
     </div>
   )
 }
