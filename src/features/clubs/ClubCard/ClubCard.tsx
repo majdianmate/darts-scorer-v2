@@ -1,4 +1,5 @@
-import { type FC } from 'react'
+import { type FC, type MouseEvent } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import type { Club } from '../../../../types/club-types'
 import ClubCardMembers from './ClubCardMembers'
 import ClubCardInvitations from './ClubCardInvitations'
@@ -23,7 +24,16 @@ interface ClubCardProps {
 }
 
 const ClubCard: FC<ClubCardProps> = ({ club }) => {
+  const navigate = useNavigate()
   const { deleteClub } = useClub(club.id)
+
+  const goToClub = () => {
+    navigate({ to: '/clubs/$club', params: { club: club.id } })
+  }
+
+  const stopCardNavigation = (event: MouseEvent) => {
+    event.stopPropagation()
+  }
 
   const onManageMembers = () => {
     setTargetClubId(club.id)
@@ -41,10 +51,13 @@ const ClubCard: FC<ClubCardProps> = ({ club }) => {
   }
 
   return (
-    <Card className="flex h-full flex-col">
+    <Card
+      className="flex h-full cursor-pointer flex-col transition-colors hover:bg-muted/20"
+      onClick={goToClub}
+    >
       <CardHeader>
         <CardTitle className="line-clamp-1 pr-1">{club.name}</CardTitle>
-        <CardAction>
+        <CardAction onClick={stopCardNavigation}>
           <ClubDropdown
             club={club}
             onRemove={() => deleteClub()}
@@ -67,7 +80,10 @@ const ClubCard: FC<ClubCardProps> = ({ club }) => {
         <ClubCardSquads squads={club.squads} clubId={club.id} />
       </CardContent>
 
-      <CardFooter className="mt-auto border-t border-border/60 bg-transparent p-4 pt-3">
+      <CardFooter
+        className="mt-auto border-t border-border/60 bg-transparent p-4 pt-3"
+        onClick={stopCardNavigation}
+      >
         <Button variant="default" className="w-full gap-2" type="button">
           <Target className="size-4" />
           Start match

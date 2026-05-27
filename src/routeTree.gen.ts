@@ -16,6 +16,8 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as protectedLayoutFriendsRouteImport } from './routes/(protected)/_layout.friends'
 import { Route as protectedLayoutClubsRouteImport } from './routes/(protected)/_layout.clubs'
+import { Route as protectedLayoutClubsIndexRouteImport } from './routes/(protected)/_layout.clubs.index'
+import { Route as protectedLayoutClubsClubRouteImport } from './routes/(protected)/_layout.clubs.$club'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,22 +53,37 @@ const protectedLayoutClubsRoute = protectedLayoutClubsRouteImport.update({
   path: '/clubs',
   getParentRoute: () => protectedLayoutRoute,
 } as any)
+const protectedLayoutClubsIndexRoute =
+  protectedLayoutClubsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => protectedLayoutClubsRoute,
+  } as any)
+const protectedLayoutClubsClubRoute =
+  protectedLayoutClubsClubRouteImport.update({
+    id: '/$club',
+    path: '/$club',
+    getParentRoute: () => protectedLayoutClubsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/clubs': typeof protectedLayoutClubsRoute
+  '/clubs': typeof protectedLayoutClubsRouteWithChildren
   '/friends': typeof protectedLayoutFriendsRoute
+  '/clubs/$club': typeof protectedLayoutClubsClubRoute
+  '/clubs/': typeof protectedLayoutClubsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/clubs': typeof protectedLayoutClubsRoute
   '/friends': typeof protectedLayoutFriendsRoute
+  '/clubs/$club': typeof protectedLayoutClubsClubRoute
+  '/clubs': typeof protectedLayoutClubsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -75,8 +92,10 @@ export interface FileRoutesById {
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(protected)/_layout': typeof protectedLayoutRouteWithChildren
-  '/(protected)/_layout/clubs': typeof protectedLayoutClubsRoute
+  '/(protected)/_layout/clubs': typeof protectedLayoutClubsRouteWithChildren
   '/(protected)/_layout/friends': typeof protectedLayoutFriendsRoute
+  '/(protected)/_layout/clubs/$club': typeof protectedLayoutClubsClubRoute
+  '/(protected)/_layout/clubs/': typeof protectedLayoutClubsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,8 +106,17 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/clubs'
     | '/friends'
+    | '/clubs/$club'
+    | '/clubs/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/clubs' | '/friends'
+  to:
+    | '/'
+    | '/forgot-password'
+    | '/sign-in'
+    | '/sign-up'
+    | '/friends'
+    | '/clubs/$club'
+    | '/clubs'
   id:
     | '__root__'
     | '/'
@@ -98,6 +126,8 @@ export interface FileRouteTypes {
     | '/(protected)/_layout'
     | '/(protected)/_layout/clubs'
     | '/(protected)/_layout/friends'
+    | '/(protected)/_layout/clubs/$club'
+    | '/(protected)/_layout/clubs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -159,16 +189,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof protectedLayoutClubsRouteImport
       parentRoute: typeof protectedLayoutRoute
     }
+    '/(protected)/_layout/clubs/': {
+      id: '/(protected)/_layout/clubs/'
+      path: '/'
+      fullPath: '/clubs/'
+      preLoaderRoute: typeof protectedLayoutClubsIndexRouteImport
+      parentRoute: typeof protectedLayoutClubsRoute
+    }
+    '/(protected)/_layout/clubs/$club': {
+      id: '/(protected)/_layout/clubs/$club'
+      path: '/$club'
+      fullPath: '/clubs/$club'
+      preLoaderRoute: typeof protectedLayoutClubsClubRouteImport
+      parentRoute: typeof protectedLayoutClubsRoute
+    }
   }
 }
 
+interface protectedLayoutClubsRouteChildren {
+  protectedLayoutClubsClubRoute: typeof protectedLayoutClubsClubRoute
+  protectedLayoutClubsIndexRoute: typeof protectedLayoutClubsIndexRoute
+}
+
+const protectedLayoutClubsRouteChildren: protectedLayoutClubsRouteChildren = {
+  protectedLayoutClubsClubRoute: protectedLayoutClubsClubRoute,
+  protectedLayoutClubsIndexRoute: protectedLayoutClubsIndexRoute,
+}
+
+const protectedLayoutClubsRouteWithChildren =
+  protectedLayoutClubsRoute._addFileChildren(protectedLayoutClubsRouteChildren)
+
 interface protectedLayoutRouteChildren {
-  protectedLayoutClubsRoute: typeof protectedLayoutClubsRoute
+  protectedLayoutClubsRoute: typeof protectedLayoutClubsRouteWithChildren
   protectedLayoutFriendsRoute: typeof protectedLayoutFriendsRoute
 }
 
 const protectedLayoutRouteChildren: protectedLayoutRouteChildren = {
-  protectedLayoutClubsRoute: protectedLayoutClubsRoute,
+  protectedLayoutClubsRoute: protectedLayoutClubsRouteWithChildren,
   protectedLayoutFriendsRoute: protectedLayoutFriendsRoute,
 }
 
