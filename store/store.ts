@@ -1,7 +1,7 @@
 import { Store } from "@tanstack/react-store";
 import { useSelector } from "@tanstack/react-store";
 
-type DialogName = "memberManager";
+type DialogName = "memberManager" | "editClub";
 
 interface DialogsState {
   dialogs: Record<DialogName, boolean>;
@@ -11,6 +11,7 @@ interface DialogsState {
 export const dialogStore = new Store<DialogsState>({
   dialogs: {
     memberManager: false,
+    editClub: false,
   },
   targetClubId: null,
 });

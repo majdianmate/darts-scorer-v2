@@ -5,6 +5,7 @@ import CreateClubDialog from './ClubCreator/CreateClubDialog'
 import ClubCard from './ClubCard/ClubCard'
 import ClubInvites from './ClubInvites/ClubInvites'
 import MemberManagerDialog from './MemberManager/MemberManagerDialog'
+import ClubEditor from './ClubEditor/ClubEditor'
 
 const Clubs = () => {
   const { user } = useUser()
@@ -35,6 +36,7 @@ const Clubs = () => {
         </div>
       </ScrollArea>
       <MemberManagerDialog  />
+      <ClubEditor />
     </div>
   )
 }

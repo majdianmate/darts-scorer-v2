@@ -19,12 +19,17 @@ const ClubCard:FC<ClubCardProps> = ({ club }) => {
       setTargetClubId(club.id);
       setDialog('memberManager', true);
     }
+
+    const onEdit = () => {
+      setTargetClubId(club.id);
+      setDialog('editClub', true);
+    }
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>{club.name}</CardTitle>
-          <ClubDropdown club={club} onRemove={() => deleteClub()} onManageMembers={onManageMembers} />
+          <ClubDropdown club={club} onRemove={() => deleteClub()} onManageMembers={onManageMembers} onEdit={onEdit} />
         </div>
         <CardDescription>{club.description}</CardDescription>
       </CardHeader>

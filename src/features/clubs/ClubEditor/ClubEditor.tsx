@@ -1,8 +1,132 @@
-import React from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '#/components/ui/dialog'
+import { Button } from '#/components/ui/button'
+import { Loader2 } from 'lucide-react'
+import { useSelector } from '@tanstack/react-store'
+import { dialogStore, setDialog } from '../../../../store/store'
+import { useClub } from '../../../../hooks/use-club'
+import ClubEditorForm from './ClubEditorForm'
 
 const ClubEditor = () => {
+  const dialogs = useSelector(dialogStore, (s) => s.dialogs)
+  const targetClubId = useSelector(dialogStore, (s) => s.targetClubId)
+  const { club, isGetClubLoading, updateClub, isUpdateClubPending } = useClub(
+    targetClubId ?? '',
+  )
+
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+
+  useEffect(() => {
+    if (!dialogs.editClub || !club) return
+
+    setName(club.name)
+    setDescription(club.description)
+  }, [dialogs.editClub, club])
+
+  const isDirty = useMemo(() => {
+    if (!club) return false
+
+    return (
+      name.trim() !== club.name.trim() ||
+      description.trim() !== club.description.trim()
+    )
+  }, [club, name, description])
+
+  const handleOpenChange = (open: boolean) => {
+    setDialog('editClub', open)
+
+    if (!open && club) {
+      setName(club.name)
+      setDescription(club.description)
+    }
+  }
+
+  const handleSave = () => {
+    const trimmedName = name.trim()
+    const trimmedDescription = description.trim()
+
+    if (!trimmedName || !isDirty) return
+
+    updateClub(
+      { name: trimmedName, description: trimmedDescription },
+      {
+        onSuccess: () => setDialog('editClub', false),
+      },
+    )
+  }
+
   return (
-    <div>ClubEditor</div>
+    <Dialog open={dialogs.editClub} onOpenChange={handleOpenChange}>
+      <DialogContent className="flex max-h-[min(90vh,calc(100vh-2rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
+        <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
+          <DialogTitle>Edit club</DialogTitle>
+          <DialogDescription>
+            {club
+              ? `Update details for ${club.name}.`
+              : 'Update the club name and description.'}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="p-6">
+          {isGetClubLoading ? (
+            <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" />
+              Loading club…
+            </div>
+          ) : club ? (
+            <ClubEditorForm
+              name={name}
+              description={description}
+              onNameChange={setName}
+              onDescriptionChange={setDescription}
+              disabled={isUpdateClubPending}
+            />
+          ) : (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              Club not found.
+            </p>
+          )}
+        </div>
+
+        <DialogFooter className="shrink-0 border-t border-border p-6">
+          <Button
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={isUpdateClubPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            disabled={
+              !club ||
+              !name.trim() ||
+              !isDirty ||
+              isUpdateClubPending ||
+              isGetClubLoading
+            }
+            onClick={handleSave}
+          >
+            {isUpdateClubPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Saving…
+              </>
+            ) : (
+              'Save changes'
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
