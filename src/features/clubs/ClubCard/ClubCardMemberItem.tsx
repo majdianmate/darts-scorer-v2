@@ -3,7 +3,13 @@ import type { ClubMember } from '../../../../types/club-types'
 import Avatar from '#/components/Avatar'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '#/lib/utils.ts'
-import { Crown, Shield, UserRound, UserRoundPlus } from 'lucide-react'
+import {
+  Clock,
+  Crown,
+  Shield,
+  UserRound,
+  UserRoundPlus,
+} from 'lucide-react'
 import { ClubRole } from '../../../../types/club-types'
 import { roleAvatarRings, roleLabels, roleRowStyles, roleStyles } from './roles'
 import ClubMemberDropdown from './ClubMemberDropdown'
@@ -39,6 +45,7 @@ const ClubCardMemberItem: FC<ClubCardMemberItemProps> = ({
   )
 
   const isSelf = user?.id === member.userId
+  const isGuest = member.role === ClubRole.GUEST && !member.userId
 
   return (
     <div
@@ -67,7 +74,9 @@ const ClubCardMemberItem: FC<ClubCardMemberItemProps> = ({
           {member.user.name}
         </div>
         <div className="truncate text-xs text-muted-foreground">
-          @{member.user.username}
+          {isGuest && member.joinCode
+            ? `Join code · ${member.joinCode}`
+            : `@${member.user.username}`}
         </div>
       </div>
       {isSelf && (
@@ -84,7 +93,7 @@ const ClubCardMemberItem: FC<ClubCardMemberItemProps> = ({
           variant="outline"
           className={cn('shrink-0 gap-1 px-2', roleStyles['PENDING'])}
         >
-          <RoleIcon className="size-3" />
+          <Clock className="size-3" />
           {roleLabels['PENDING']}
         </Badge>
       ) : (

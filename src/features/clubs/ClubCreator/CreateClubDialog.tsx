@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,33 +10,38 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Separator } from '#/components/ui/separator'
+import { Plus } from 'lucide-react'
 import ClubCreatorBase from './ClubCreatorBase'
 import ClubCreatorMemberSelector from './ClubCreatorMemberSelector'
 import type { User } from '../../../../types/user-types'
 import { useUser } from '../../../../hooks/use-user'
 import { useClubs } from '../../../../hooks/use-club'
 
-const CreateClubDialog = () => {
+interface CreateClubDialogProps {
+  trigger?: ReactNode
+}
+
+const CreateClubDialog = ({ trigger }: CreateClubDialogProps) => {
   const { user } = useUser()
   const { createClub } = useClubs(user ?? null)
 
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-
   const [selectedUsers, setSelectedUsers] = useState<User[]>([])
 
   const handleCreateClub = () => {
     createClub({
       data: {
-        name,
-        description,
+        name: name.trim(),
+        description: description.trim(),
       },
       invitees: selectedUsers,
-    });
+    })
     setName('')
     setDescription('')
     setSelectedUsers([])
+    setOpen(false)
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -45,17 +50,25 @@ const CreateClubDialog = () => {
     if (!nextOpen) {
       setName('')
       setDescription('')
+      setSelectedUsers([])
     }
   }
 
+  const defaultTrigger = (
+    <Button variant="default" className="gap-2">
+      <Plus className="size-4" />
+      Create club
+    </Button>
+  )
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button variant="default">Create Club</Button>} />
+      <DialogTrigger render={trigger ?? defaultTrigger} />
       <DialogContent className="flex max-h-[min(720px,calc(100vh-2rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
         <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
-          <DialogTitle>Create Club</DialogTitle>
+          <DialogTitle>Create club</DialogTitle>
           <DialogDescription>
-            Create a new club for your friends to join.
+            Set up your club and optionally invite friends right away.
           </DialogDescription>
         </DialogHeader>
 
@@ -80,16 +93,18 @@ const CreateClubDialog = () => {
           </div>
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-border p-6">
+        <DialogFooter className="shrink-0 gap-2 border-t border-border p-6">
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Cancel
           </Button>
           <Button
             variant="default"
+            className="gap-2"
             disabled={!name.trim()}
             onClick={handleCreateClub}
           >
-            Create
+            <Plus className="size-4" />
+            Create club
           </Button>
         </DialogFooter>
       </DialogContent>

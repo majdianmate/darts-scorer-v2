@@ -11,7 +11,7 @@ import { Button } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
 import { ScrollArea } from '#/components/ui/scroll-area'
 import { Separator } from '#/components/ui/separator'
-import { Loader2, UserPlus, Users } from 'lucide-react'
+import { Loader2, Send, UserPlus, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { dialogStore, setDialog } from '../../../../store/store'
 import { useSelector } from '@tanstack/react-store'
@@ -184,8 +184,8 @@ const MemberManagerDialog = () => {
           </div>
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-border p-6">
-          <p className="hidden text-xs text-muted-foreground sm:block">
+        <DialogFooter className="shrink-0 flex-col gap-3 border-t border-border p-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-center text-xs text-muted-foreground sm:text-left">
             {inviteCount > 0
               ? `${inviteCount} player${inviteCount === 1 ? '' : 's'} selected`
               : 'Select players or guests to invite'}
@@ -210,6 +210,7 @@ const MemberManagerDialog = () => {
                 </>
               ) : (
                 <>
+                  <Send className="size-4" />
                   Send invitation{inviteCount === 1 ? '' : 's'}
                   {inviteCount > 0 && ` (${inviteCount})`}
                 </>

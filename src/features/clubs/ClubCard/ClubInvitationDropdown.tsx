@@ -1,42 +1,59 @@
-import React, { type FC } from 'react'
-import { ClubRole, ROLE_RANK, type ClubMember } from '../../../../types/club-types'
+import { type FC } from 'react'
+import {
+  ClubRole,
+  ROLE_RANK,
+  type ClubMember,
+} from '../../../../types/club-types'
 import { useUser } from '../../../../hooks/use-user'
-import type { Club } from '../../../../types/club-types'
 import type { DropdownOption } from '#/components/Dropdown/DropdownComponent'
-import { MoreVerticalIcon, User, UserMinus } from 'lucide-react'
+import { MailX, MoreVertical } from 'lucide-react'
 import DropdownComponent from '#/components/Dropdown/DropdownComponent'
 import { useClub } from '../../../../hooks/use-club'
 
 interface ClubInvitationDropdownProps {
   member: ClubMember
-  onCancel ?: () => void
+  onCancel?: () => void
 }
 
-const ClubInvitationDropdown: FC<ClubInvitationDropdownProps> = ({ member, onCancel }) => {
-    const {user} = useUser();
-    const { club } = useClub(member.clubId);
-    if (!club) return null;
-    const currentUserRole = club.members.find(m => m.userId === user?.id)?.role;
-    const isInvitationFromCurrentUser = member.invitedBy?.id === user?.id;
+const ClubInvitationDropdown: FC<ClubInvitationDropdownProps> = ({
+  member,
+  onCancel,
+}) => {
+  const { user } = useUser()
+  const { club } = useClub(member.clubId)
 
-    const dropdownOptions: DropdownOption[] = [
-        {
-            label: 'View member',
-            icon: User,
-            onClick: () => {
-                console.log('View member')
-            },
-        },
-        {
-            label: 'Cancel invitation',
-            icon: UserMinus,
-            onClick: () => onCancel?.(),
-            variant: 'destructive',
-            render: !!currentUserRole && ROLE_RANK[currentUserRole] > ROLE_RANK[ClubRole.MEMBER] || isInvitationFromCurrentUser,
-        },
-    ]
+  if (!club) return null
+
+  const currentUserRole = club.members.find((m) => m.userId === user?.id)?.role
+  const isInvitationFromCurrentUser = member.invitedBy?.id === user?.id
+  const canCancel =
+    (!!currentUserRole &&
+      ROLE_RANK[currentUserRole] > ROLE_RANK[ClubRole.MEMBER]) ||
+    isInvitationFromCurrentUser
+
+  const dropdownOptions: DropdownOption[] = [
+    {
+      label: 'Cancel invitation',
+      icon: MailX,
+      onClick: () => onCancel?.(),
+      variant: 'destructive',
+      render: canCancel,
+    },
+  ]
+
   return (
-    <DropdownComponent options={dropdownOptions} trigger={<MoreVerticalIcon className="size-4" />} />
+    <DropdownComponent
+      options={dropdownOptions}
+      trigger={
+        <button
+          type="button"
+          className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:bg-muted hover:text-foreground data-[popup-open]:opacity-100"
+          aria-label={`Invitation actions for ${member.user.name}`}
+        >
+          <MoreVertical className="size-4" />
+        </button>
+      }
+    />
   )
 }
 

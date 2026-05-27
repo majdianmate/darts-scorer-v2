@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Save } from 'lucide-react'
 import { useSelector } from '@tanstack/react-store'
 import { dialogStore, setDialog } from '../../../../store/store'
 import { useClub } from '../../../../hooks/use-club'
@@ -96,7 +96,7 @@ const ClubEditor = () => {
           )}
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-border p-6">
+        <DialogFooter className="shrink-0 gap-2 border-t border-border p-6">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
@@ -121,7 +121,10 @@ const ClubEditor = () => {
                 Saving…
               </>
             ) : (
-              'Save changes'
+              <>
+                <Save className="size-4" />
+                Save changes
+              </>
             )}
           </Button>
         </DialogFooter>

@@ -12,6 +12,7 @@ import { cn } from '#/lib/utils.ts'
 import { useUser } from '../../../../hooks/use-user'
 import { useFriends } from '../../../../hooks/use-friend'
 import { searchUsersService } from '../../../../services/user-service'
+import { Globe, UserRoundPlus, Users } from 'lucide-react'
 import MemberManagerGuestPicker from './MemberManagerGuestPicker'
 
 interface MemberManagerUserPickerProps {
@@ -48,9 +49,18 @@ const MemberManagerUserPicker: FC<MemberManagerUserPickerProps> = ({
 
       <Tabs className="mt-4 flex min-h-0 flex-1 flex-col">
         <TabsList defaultValue="global" className="relative shrink-0">
-          <TabsTrigger value="global">Global</TabsTrigger>
-          <TabsTrigger value="friends">Friends</TabsTrigger>
-          <TabsTrigger value="guests">Guests</TabsTrigger>
+          <TabsTrigger value="global" className="gap-1.5">
+            <Globe className="size-3.5" />
+            Global
+          </TabsTrigger>
+          <TabsTrigger value="friends" className="gap-1.5">
+            <Users className="size-3.5" />
+            Friends
+          </TabsTrigger>
+          <TabsTrigger value="guests" className="gap-1.5">
+            <UserRoundPlus className="size-3.5" />
+            Guests
+          </TabsTrigger>
         </TabsList>
         <TabsContents>
           <TabsContent value="global">

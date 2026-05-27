@@ -9,7 +9,7 @@ import {
 } from '#/components/ui/dropdown-menu'
 import { ScrollArea } from '#/components/ui/scroll-area'
 import { cn } from '#/lib/utils.ts'
-import { Building2, Check, Loader2, Mail, X } from 'lucide-react'
+import { Building2, Check, Inbox, Loader2, X } from 'lucide-react'
 import { useState } from 'react'
 import { useClubs } from '../../../../hooks/use-club'
 import { useUser } from '../../../../hooks/use-user'
@@ -50,7 +50,7 @@ const ClubInvites = () => {
       <DropdownMenuTrigger
         render={
           <Button variant="outline" className="relative gap-1.5">
-            <Mail className="size-4" />
+            <Inbox className="size-4" />
             Invites
             {inviteCount > 0 && (
               <span className="absolute -right-1.5 -top-1.5 flex size-4.5 min-w-4.5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
@@ -95,7 +95,7 @@ const ClubInvites = () => {
                   <li
                     key={invite.id}
                     className={cn(
-                      'flex items-center justify-center gap-2.5 rounded-md px-2 py-2.5 transition-colors',
+                      'flex items-start gap-2.5 rounded-md px-2 py-2.5 transition-colors',
                       isActing && 'bg-muted/40',
                     )}
                   >
