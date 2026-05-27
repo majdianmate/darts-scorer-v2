@@ -29,7 +29,7 @@ const DropdownComponent = ({ options, trigger }: DropdownComponentProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>{trigger}</DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40">
+      <DropdownMenuContent className="w-fit">
         {visibleOptions.map((option) => {
           const Icon = option.icon as LucideIcon
 

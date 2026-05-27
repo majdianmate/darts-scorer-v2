@@ -12,12 +12,16 @@ import type { ClubMember } from '../../../../types/club-types'
 import ClubCardMemberItem from './ClubCardMemberItem'
 import AvatarGroup from '#/components/AvatarGroup'
 import { sortMembersByRole } from './roles'
+import ClubCardInvitationList from './ClubCardInvitationList'
+import { Button } from '#/components/ui/button'
+import { setDialog, setTargetClubId } from '../../../../store/store'
 
 interface ClubCardInvitationsProps {
   invitations: ClubMember[]
+  clubId: string
 }
 
-const ClubCardInvitations: FC<ClubCardInvitationsProps> = ({ invitations }) => {
+const ClubCardInvitations: FC<ClubCardInvitationsProps> = ({ invitations, clubId }) => {
   const sortedInvitations = useMemo(
     () => sortMembersByRole(invitations),
     [invitations],
@@ -52,10 +56,19 @@ const ClubCardInvitations: FC<ClubCardInvitationsProps> = ({ invitations }) => {
           <p className="mb-3 text-center text-xs text-muted-foreground">
             Invite players to join this club.
           </p>
-          <div
-            className="h-8 w-full rounded-lg border border-dashed border-border/60 bg-muted/10"
-            aria-hidden
-          />
+          <div className="h-8 w-full flex justify-center items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTargetClubId(clubId)
+                setDialog('memberManager', true)
+              }}
+            >
+              <UserPlus className="size-4" />
+              Invite
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -100,16 +113,7 @@ const ClubCardInvitations: FC<ClubCardInvitationsProps> = ({ invitations }) => {
         </AccordionTrigger>
 
         <AccordionContent className="px-3 pb-3">
-          <div className="flex flex-col gap-1.5">
-            {sortedInvitations.map((invitation, index) => (
-              <ClubCardMemberItem
-                key={invitation.userId}
-                member={invitation}
-                rank={index + 1}
-                isInvitation={true}
-              />
-            ))}
-          </div>
+          <ClubCardInvitationList invitations={sortedInvitations} />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

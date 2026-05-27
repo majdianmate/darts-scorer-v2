@@ -13,8 +13,11 @@ import {
   promoteClubMemberService,
   demoteClubMemberService,
   cancelInviteService,
+  addClubMemberService,
+  addClubGuestService,
+  removeClubMemberService,
 } from "../services/club-service";
-import type { ClubDoc } from "../types/club-types";
+import type { ClubDoc, ClubRole } from "../types/club-types";
 import type { User } from "../types/user-types";
 
 export const useClub = (clubId: string, userId?: string) => {
@@ -80,6 +83,45 @@ export const useClub = (clubId: string, userId?: string) => {
     },
   });
 
+  const addMember = useMutation({
+    mutationFn: (target: {
+      userId?: string;
+      guestName?: string;
+      role: ClubRole;
+    }) => addClubMemberService(clubId!, userId!, target),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-club", clubId] });
+      queryClient.invalidateQueries({ queryKey: ["get-clubs", userId] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const addGuest = useMutation({
+    mutationFn: (guestName: string) =>
+      addClubGuestService(clubId!, userId!, guestName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-club", clubId] });
+      queryClient.invalidateQueries({ queryKey: ["get-clubs", userId] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const removeMember = useMutation({
+    mutationFn: (membershipId: string) => removeClubMemberService(membershipId, userId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-club", clubId] });
+      queryClient.invalidateQueries({ queryKey: ["get-clubs", userId] });
+      toast.success("Member removed.");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
   return {
     club: getClubQuery.data ?? null,
     isGetClubLoading: getClubQuery.isLoading,
@@ -100,6 +142,17 @@ export const useClub = (clubId: string, userId?: string) => {
 
     cancelInvite: cancelInvite.mutate,
     isCancelInvitePending: cancelInvite.isPending,
+
+    addMember: addMember.mutate,
+    addMemberAsync: addMember.mutateAsync,
+    isAddMemberPending: addMember.isPending || addGuest.isPending,
+
+    addGuest: addGuest.mutate,
+    addGuestAsync: addGuest.mutateAsync,
+
+    removeMember: removeMember.mutate,
+    removeMemberAsync: removeMember.mutateAsync,
+    isRemoveMemberPending: removeMember.isPending,
   };
 };
 

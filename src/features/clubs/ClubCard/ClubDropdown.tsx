@@ -10,11 +10,11 @@ interface ClubDropdownProps {
   onView?: () => void
   //onEdit?: () => void
   onRemove?: () => void
-  //onManageMembers?: () => void
+  onManageMembers?: () => void
   //onDetailedSquadEditor?: () => void
 }
 
-const ClubDropdown: FC<ClubDropdownProps> = ({ club, onRemove }) => {
+const ClubDropdown: FC<ClubDropdownProps> = ({ club, onRemove, onManageMembers }) => {
   const { user } = useUser()
   const dropdownOptions: DropdownOption[] = [
     {
@@ -23,6 +23,11 @@ const ClubDropdown: FC<ClubDropdownProps> = ({ club, onRemove }) => {
       onClick: () => {
         console.log('View club')
       },
+    },
+    {
+      label: 'Manage members',
+      icon: Users,
+      onClick: () => onManageMembers?.(),
     },
     {
       label: 'Remove club',

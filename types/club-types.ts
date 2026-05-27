@@ -38,7 +38,7 @@ export interface Club extends ClubDoc {
 
 export interface ClubMemberDoc {
   clubId: string;
-  user: User;
+  user?: User;
   userId: string | null;
   guestName: string | null;
   joinCode: string | null;

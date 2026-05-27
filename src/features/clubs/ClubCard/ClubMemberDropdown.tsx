@@ -20,6 +20,7 @@ const ClubMemberDropdown: FC<ClubMemberDropdownProps> = ({ member, onRemove, onL
     const { club } = useClub(member.clubId);
     if (!club) return null;
     const currentUserRole = club.members.find(m => m.userId === user?.id)?.role;
+    const targetMemberRole = member.role;
     const isMemberSelf = member.userId === user?.id;
     const dropdownOptions: DropdownOption[] = [
         {
@@ -55,7 +56,7 @@ const ClubMemberDropdown: FC<ClubMemberDropdownProps> = ({ member, onRemove, onL
             icon: UserMinus,
             onClick: () => onRemove?.(),
             variant: 'destructive',
-            render: !!currentUserRole && ROLE_RANK[currentUserRole] > ROLE_RANK[ClubRole.MEMBER] && !isMemberSelf,
+            render: !!currentUserRole && ROLE_RANK[currentUserRole] > ROLE_RANK[targetMemberRole] && !isMemberSelf,
         },
     ]
   return (

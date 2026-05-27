@@ -10,6 +10,7 @@ import {
     where,
     Timestamp,
     serverTimestamp,
+    setDoc,
   } from "firebase/firestore";
   import { db } from "@/lib/firebase";
   import type { User } from "../types/user-types";
@@ -36,9 +37,34 @@ import {
   // ---------------------------------------------------------------------------
   
   async function fetchUser(userId: string): Promise<User> {
+    if (!userId) {
+      throw new Error("Invalid user ID");
+    }
     const snap = await getDoc(doc(db, "users", userId));
     if (!snap.exists()) throw new Error(`User not found: ${userId}`);
     return { id: snap.id, ...snap.data() } as User;
+  }
+
+  function createGuestDisplayUser(
+    guestName: string,
+    joinCode?: string | null,
+  ): User {
+    const now = Timestamp.now();
+    const slug = guestName
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+
+    return {
+      id: `guest-${slug || "member"}`,
+      name: guestName.trim(),
+      email: "",
+      image: "",
+      username: joinCode ?? slug ?? "guest",
+      createdAt: now,
+      updatedAt: now,
+    };
   }
   
   async function fetchUsers(userIds: string[]): Promise<Map<string, User>> {
@@ -71,7 +97,11 @@ import {
   
     return raw.map((m) => ({
       ...m,
-      user: userMap.get(m.userId ?? "") ?? m.user,
+      user: m.userId
+        ? (userMap.get(m.userId) ??
+          m.user ??
+          createGuestDisplayUser(m.guestName ?? "Guest", m.joinCode))
+        : createGuestDisplayUser(m.guestName ?? "Guest", m.joinCode),
       invitedBy: m.invitedById ? (userMap.get(m.invitedById) ?? null) : null,
     }));
   }
@@ -390,5 +420,116 @@ import {
     }
   
     // 3. Törlés
+    await deleteDoc(memberRef);
+  }
+
+  export async function addClubMemberService(
+    clubId: string,
+    invitedById: string,
+    target: { userId?: string; guestName?: string; role: ClubRole },
+  ): Promise<void> {
+    const guestName = target.guestName?.trim();
+    if (guestName) {
+      await addClubGuestService(clubId, invitedById, guestName);
+      return;
+    }
+
+    if (!target.userId) {
+      throw new Error("User ID is required");
+    }
+
+    const memberId = `${clubId}_${target.userId}`;
+    const memberRef = doc(db, "clubMembers", memberId);
+
+    const existing = await getDoc(memberRef);
+    if (existing.exists()) {
+      throw new Error("User already in club");
+    }
+
+    const invitedUser = await fetchUser(target.userId);
+
+    const newMember: ClubMemberDoc = {
+      clubId,
+      user: invitedUser,
+      userId: target.userId,
+      guestName: null,
+      joinCode: null,
+      role: target.role,
+      status: ClubMemberStatus.PENDING,
+      invitedById,
+      invitedAt: serverTimestamp() as Timestamp,
+      acceptedAt: null,
+    };
+
+    await setDoc(memberRef, newMember);
+  }
+
+  export async function addClubGuestService(
+    clubId: string,
+    invitedById: string,
+    guestName: string
+  ): Promise<string> { // Visszaadjuk a kódot, hogy kiírhassuk a UI-on
+    const trimmedName = guestName.trim();
+    if (!trimmedName) {
+      throw new Error("Guest name is required");
+    }
+
+    const memberRef = doc(collection(db, "clubMembers"));
+    
+    // Generálunk egy egyedi kódot (pl: G-X89K2)
+    const initial = trimmedName[0]?.toUpperCase() ?? "G";
+    const registrationId = `${initial}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+  
+    const newGuest: ClubMemberDoc = {
+      clubId,
+      userId: null,
+      guestName: trimmedName,
+      joinCode: registrationId, // Ez a regisztrációs ID
+      role: ClubRole.GUEST,
+      status: ClubMemberStatus.ACCEPTED,
+      invitedById,
+      invitedAt: serverTimestamp() as Timestamp,
+      acceptedAt: serverTimestamp() as Timestamp,
+    };
+  
+    await setDoc(memberRef, newGuest);
+    return registrationId;
+  }
+
+  export async function removeClubMemberService(
+    membershipId: string,
+    currentUserId: string
+  ): Promise<void> {
+    const memberRef = doc(db, "clubMembers", membershipId);
+    const memberSnap = await getDoc(memberRef);
+  
+    if (!memberSnap.exists()) throw new Error("The member is not found.");
+    const memberData = memberSnap.data() as ClubMemberDoc;
+  
+    // 1. Leadert nem lehet kirúgni
+    if (memberData.role === ClubRole.LEADER) {
+      throw new Error("The leader cannot be removed.");
+    }
+  
+    // 2. Jogosultság ellenőrzése (Leader vagy Captain)
+    const currentUserRoleQuery = query(
+      collection(db, "clubMembers"),
+      where("clubId", "==", memberData.clubId),
+      where("userId", "==", currentUserId)
+    );
+    const roleSnap = await getDocs(currentUserRoleQuery);
+    
+    if (roleSnap.empty) throw new Error("You are not a member of the club.");
+    
+    const currentUserData = roleSnap.docs[0].data() as ClubMemberDoc;
+    const canRemove = 
+      currentUserData.role === ClubRole.LEADER || 
+      (currentUserData.role === ClubRole.CAPTAIN && (memberData.role === ClubRole.MEMBER || memberData.role === ClubRole.GUEST)) ||
+      (currentUserData.role === ClubRole.MEMBER && memberData.role === ClubRole.GUEST);
+  
+    if (!canRemove) {
+      throw new Error("You don't have permission to remove the member.");
+    }
+  
     await deleteDoc(memberRef);
   }

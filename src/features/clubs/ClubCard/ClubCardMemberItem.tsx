@@ -33,10 +33,12 @@ const ClubCardMemberItem: FC<ClubCardMemberItemProps> = ({
 
   const { user } = useUser()
   const { leaveClub } = useClubs(user)
-  const { promoteClubMember, demoteClubMember, cancelInvite } = useClub(  
+  const { promoteClubMember, demoteClubMember, cancelInvite, removeMember } = useClub(  
     member.clubId,
     user?.id ?? '',
   )
+
+  const isSelf = user?.id === member.userId
 
   return (
     <div
@@ -68,6 +70,15 @@ const ClubCardMemberItem: FC<ClubCardMemberItemProps> = ({
           @{member.user.username}
         </div>
       </div>
+      {isSelf && (
+        <Badge
+          variant="outline"
+          className={cn('shrink-0 gap-1 px-2', roleStyles['SELF'])}
+        >
+          <UserRound className="size-3" />
+          {roleLabels['SELF']}
+        </Badge>
+      )}
       {isInvitation ? (
         <Badge
           variant="outline"
@@ -95,7 +106,7 @@ const ClubCardMemberItem: FC<ClubCardMemberItemProps> = ({
       ) : (
         <ClubMemberDropdown
           member={member}
-          onRemove={() => {}}
+          onRemove={() => removeMember(member.id)}
           onLeave={() => leaveClub({ clubId: member.clubId })}
           onPromoteToCaptain={() =>
             promoteClubMember({

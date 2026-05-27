@@ -11,6 +11,7 @@ import type { User } from '../../../types/user-types'
 import { cn } from '#/lib/utils.ts'
 import UserPickerOption from './UserPickerOption'
 import UserPickerSelectedTags from './UserPickerSelectedTags'
+import type { UserPickerGuest } from './user-picker-types'
 
 const GLOBAL_MIN_SEARCH_LENGTH = 3
 
@@ -27,9 +28,21 @@ function filterUsersByTerm(users: User[], term: string) {
   )
 }
 
-export interface UserPickerProps {
-  selectedUsers: User[]
-  onSelectionChange: (users: User[]) => void
+type SelectableWithId = { id: string }
+
+function isGuestSelectionItem(
+  item: SelectableWithId,
+): item is UserPickerGuest {
+  return (
+    'kind' in item &&
+    (item as UserPickerGuest).kind === 'guest' &&
+    'guestName' in item
+  )
+}
+
+export interface UserPickerProps<T extends SelectableWithId = User> {
+  selectedUsers: T[]
+  onSelectionChange: (users: T[]) => void
   /** Local list to display and filter. When omitted, global remote search is used. */
   source?: User[]
   /** Remote search used only when `source` is not provided. */
@@ -47,7 +60,7 @@ export interface UserPickerProps {
   excludeUserIds?: string[]
 }
 
-const UserPicker = ({
+const UserPicker = <T extends SelectableWithId = User>({
   selectedUsers,
   onSelectionChange,
   source,
@@ -61,7 +74,7 @@ const UserPicker = ({
   fillHeight = false,
   className = '',
   excludeUserIds,
-}: UserPickerProps) => {
+}: UserPickerProps<T>) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [remoteResults, setRemoteResults] = useState<User[]>([])
   const [isSearching, setIsSearching] = useState(false)
@@ -80,12 +93,26 @@ const UserPicker = ({
     [lockedUserIds],
   )
 
-  const lockedUsers = useMemo(
-    () => selectedUsers.filter((user) => lockedSet.has(user.id)),
-    [selectedUsers, lockedSet],
+  const nonGuestSelection = useMemo(
+    () => selectedUsers.filter((item) => !isGuestSelectionItem(item)),
+    [selectedUsers],
   )
 
-  const emitSelectionChange = (users: User[]) => {
+  const guestSelection = useMemo(
+    () => selectedUsers.filter(isGuestSelectionItem),
+    [selectedUsers],
+  )
+
+  const lockedUsers = useMemo(() => {
+    const users: User[] = []
+    for (const item of nonGuestSelection) {
+      const user = item as User
+      if (lockedSet.has(user.id)) users.push(user)
+    }
+    return users
+  }, [nonGuestSelection, lockedSet])
+
+  const emitUserSelectionChange = (users: User[]) => {
     const nextIds = new Set(users.map((user) => user.id))
     const merged = [...users]
 
@@ -95,7 +122,7 @@ const UserPicker = ({
       }
     }
 
-    onSelectionChange(merged)
+    onSelectionChange([...merged, ...guestSelection] as T[])
   }
 
   useEffect(() => {
@@ -135,32 +162,44 @@ const UserPicker = ({
   }, [hasSource, source, trimmedTerm, remoteResults, excludeSet])
 
   const isUserSelected = (user: User) =>
-    selectedUsers.some((selected) => selected.id === user.id)
+    nonGuestSelection.some((selected) => (selected as User).id === user.id)
 
   const isUserLocked = (user: User) => lockedSet.has(user.id)
 
   const toggleUser = (user: User) => {
     if (isUserLocked(user)) return
 
+    const selectedUserItems = nonGuestSelection as User[]
+
     if (isUserSelected(user)) {
-      emitSelectionChange(
-        selectedUsers.filter((selected) => selected.id !== user.id),
+      emitUserSelectionChange(
+        selectedUserItems.filter((selected) => selected.id !== user.id),
       )
       return
     }
 
     if (multiple) {
-      emitSelectionChange([...selectedUsers, user])
+      emitUserSelectionChange([...selectedUserItems, user])
     } else {
-      emitSelectionChange([user, ...lockedUsers])
+      emitUserSelectionChange([user, ...lockedUsers])
     }
   }
 
-  const removeSelectedUser = (user: User) => {
+  const removeSelectedItem = (item: T) => {
+    if (isGuestSelectionItem(item)) {
+      onSelectionChange(
+        selectedUsers.filter((selected) => selected.id !== item.id),
+      )
+      return
+    }
+
+    const user = item as User
     if (isUserLocked(user)) return
 
-    emitSelectionChange(
-      selectedUsers.filter((selected) => selected.id !== user.id),
+    emitUserSelectionChange(
+      (nonGuestSelection as User[]).filter(
+        (selected) => selected.id !== user.id,
+      ),
     )
   }
 
@@ -203,7 +242,7 @@ const UserPicker = ({
       {showSelectedTags && (
         <UserPickerSelectedTags
           selectedUsers={selectedUsers}
-          onRemove={removeSelectedUser}
+          onRemove={removeSelectedItem}
           lockedUserIds={lockedUserIds}
         />
       )}

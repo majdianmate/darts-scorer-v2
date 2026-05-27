@@ -12,6 +12,7 @@ import type { ClubMember } from '../../../../types/club-types'
 import ClubCardMemberItem from './ClubCardMemberItem'
 import AvatarGroup from '#/components/AvatarGroup'
 import { sortMembersByRole } from './roles'
+import ClubCardMemberList from './ClubCardMemberList'
 
 interface ClubCardMembersProps {
   members: ClubMember[]
@@ -62,15 +63,7 @@ const ClubCardMembers: FC<ClubCardMembersProps> = ({ members }) => {
         </AccordionTrigger>
 
         <AccordionContent className="px-3 pb-3">
-          <div className="flex flex-col gap-1.5">
-            {sortedMembers.map((member, index) => (
-              <ClubCardMemberItem
-                key={member.id}
-                member={member}
-                rank={index + 1}
-              />
-            ))}
-          </div>
+          <ClubCardMemberList members={sortedMembers} />
         </AccordionContent>
       </AccordionItem>
     </Accordion>
