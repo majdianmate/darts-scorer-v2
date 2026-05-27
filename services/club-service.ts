@@ -9,6 +9,7 @@ import {
     query,
     where,
     Timestamp,
+    serverTimestamp,
   } from "firebase/firestore";
   import { db } from "@/lib/firebase";
   import type { User } from "../types/user-types";
@@ -19,6 +20,7 @@ import {
     type ClubMember,
     ClubRole,
     ClubMemberStatus,
+    type ClubInvite,
   } from "../types/club-types";
   
   // ---------------------------------------------------------------------------
@@ -180,4 +182,213 @@ import {
       deleteDoc(clubRef(clubId)),
       ...membersSnap.docs.map((d) => deleteDoc(d.ref)),
     ]);
+  }
+
+  export async function acceptClubInviteService(membershipId: string): Promise<void> {
+    const ref = doc(db, "clubMembers", membershipId);
+    await updateDoc(ref, {
+      status: ClubMemberStatus.ACCEPTED,
+      acceptedAt: serverTimestamp(),
+    });
+  }
+
+  export async function rejectClubInviteService(membershipId: string): Promise<void> {
+    await deleteDoc(doc(db, "clubMembers", membershipId));
+  }
+
+  export async function getIncomingClubInvitesService(userId: string): Promise<ClubInvite[]> {
+    // 1. Lekérjük azokat a tagságokat, amik PENDING állapotúak az adott usernek
+    const q = query(
+      collection(db, "clubMembers"),
+      where("userId", "==", userId),
+      where("status", "==", ClubMemberStatus.PENDING)
+    );
+  
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return [];
+  
+    const memberDocs = querySnapshot.docs.map(d => ({ 
+      id: d.id, 
+      ...d.data() 
+    } as ClubMemberDoc & { id: string }));
+  
+    const inviterIds = Array.from(new Set(memberDocs.map(m => m.invitedById)));
+    const clubIds = Array.from(new Set(memberDocs.map(m => m.clubId)));
+
+    const usersMap = await fetchUsers(inviterIds);
+
+    const clubSnaps = await Promise.all(
+      clubIds.map((clubId) => getDoc(doc(db, "clubs", clubId))),
+    );
+    const clubNameById: Record<string, string> = {};
+    for (const snap of clubSnaps) {
+      if (snap.exists()) {
+        clubNameById[snap.id] = (snap.data() as ClubDoc).name;
+      }
+    }
+  
+    return memberDocs.map((m) => ({
+      id: m.id,
+      clubId: m.clubId,
+      clubName: clubNameById[m.clubId] ?? "Club",
+      from: usersMap.get(m.invitedById) as User,
+      createdAt: m.invitedAt,
+    }));
+  }
+
+  export async function leaveClubService(
+    clubId: string,
+    userId: string
+  ): Promise<void> {
+    const q = query(
+      collection(db, "clubMembers"),
+      where("clubId", "==", clubId),
+      where("userId", "==", userId)
+    );
+    const snap = await getDocs(q);
+  
+    if (snap.empty) throw new Error("You are not a member of the club.");
+    
+    const memberDoc = snap.docs[0];
+    const memberData = memberDoc.data() as ClubMemberDoc;
+  
+    // 1. Leader nem léphet ki (át kell adnia a klubot vagy törölnie kell)
+    if (memberData.role === ClubRole.LEADER) {
+      throw new Error("You cannot leave as a leader. You need to transfer the leadership or delete the club.");
+    }
+  
+    await deleteDoc(memberDoc.ref);
+  }
+  
+  export async function promoteClubMemberService(
+    membershipId: string, 
+    currentUserId: string
+  ): Promise<void> {
+    // 1. Lekérjük a célszemély tagsági adatait, hogy tudjuk, melyik klubról van szó
+    const targetMemberRef = doc(db, "clubMembers", membershipId);
+    const targetMemberSnap = await getDoc(targetMemberRef);
+  
+    if (!targetMemberSnap.exists()) {
+      throw new Error("The target user is not a member of the club.");
+    }
+  
+    const { clubId } = targetMemberSnap.data() as ClubMemberDoc;
+  
+    // 2. Ellenőrizzük, hogy a JELENLEGI user LEADER-e a klubnak
+    // Olyan dokumentumot keresünk a clubMembers-ben, ahol a clubId egyezik, 
+    // a userId a miénk, és a role LEADER
+    const leaderQuery = query(
+      collection(db, "clubMembers"),
+      where("clubId", "==", clubId),
+      where("userId", "==", currentUserId),
+      where("role", "==", ClubRole.LEADER)
+    );
+  
+    const leaderSnap = await getDocs(leaderQuery);
+  
+    if (leaderSnap.empty) {
+      throw new Error("You don't have permission to promote members (only Leaders can do this).");
+    }
+  
+    // 3. Ha minden oké, jöhet a promote
+    await updateDoc(targetMemberRef, {
+      role: ClubRole.CAPTAIN,
+      updatedAt: serverTimestamp(), // Érdemes ezt is frissíteni
+    });
+  }
+
+  export async function demoteClubMemberService(
+    membershipId: string, 
+    currentUserId: string
+  ): Promise<void> {
+    // 1. Célszemély lekérése a klub azonosításához
+    const targetMemberRef = doc(db, "clubMembers", membershipId);
+    const targetMemberSnap = await getDoc(targetMemberRef);
+  
+    if (!targetMemberSnap.exists()) {
+      throw new Error("The target user is not a member of the club.");
+    }
+  
+    const { clubId, role: targetRole } = targetMemberSnap.data() as ClubMemberDoc;
+  
+    // 2. Extra biztonság: Ne lehessen a Leader-t demotolni (vagy saját magát, ha ő az egyetlen leader)
+    if (targetRole === ClubRole.LEADER) {
+      throw new Error("The Leader role cannot be demoted using this method.");
+    }
+  
+    // 3. Jogosultság ellenőrzése (Csak Leader demotolhat)
+    const leaderQuery = query(
+      collection(db, "clubMembers"),
+      where("clubId", "==", clubId),
+      where("userId", "==", currentUserId),
+      where("role", "==", ClubRole.LEADER)
+    );
+  
+    const leaderSnap = await getDocs(leaderQuery);
+  
+    if (leaderSnap.empty) {
+      throw new Error("You don't have permission to demote members (only Leaders can do this).");
+    }
+  
+    // 4. Visszafokozás MEMBER rangra
+    await updateDoc(targetMemberRef, {
+      role: ClubRole.MEMBER,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  export async function cancelInviteService(
+    membershipId: string,
+    currentUserId: string
+  ): Promise<void> {
+    // 1. Lekérjük a kérdéses tagsági/meghívó adatot
+    const memberRef = doc(db, "clubMembers", membershipId);
+    const memberSnap = await getDoc(memberRef);
+  
+    if (!memberSnap.exists()) {
+      throw new Error("The invite is not found.");
+    }
+  
+    const memberData = memberSnap.data() as ClubMemberDoc;
+  
+    // Csak PENDING (vagy GUEST) állapotú meghívót lehessen visszavonni
+    if (memberData.status !== ClubMemberStatus.PENDING && memberData.role !== ClubRole.GUEST) {
+      throw new Error("Only pending invites or guests can be cancelled.");
+    }
+  
+    // 2. JOGOSULTSÁG ELLENŐRZÉSE
+    
+    // A - Ő maga hívta meg?
+    const isInviter = memberData.invitedById === currentUserId;
+  
+    if (isInviter) {
+      // Ha ő hívta meg, törölhetjük
+      await deleteDoc(memberRef);
+      return;
+    }
+  
+    // B - Ha nem ő hívta meg, ellenőrizzük a rangját a klubban
+    const currentUserRoleQuery = query(
+      collection(db, "clubMembers"),
+      where("clubId", "==", memberData.clubId),
+      where("userId", "==", currentUserId)
+    );
+  
+    const roleSnap = await getDocs(currentUserRoleQuery);
+    
+    if (roleSnap.empty) {
+      throw new Error("You are not a member of this club.");
+    }
+  
+    const currentUserData = roleSnap.docs[0].data() as ClubMemberDoc;
+    const hasAuthority = 
+      currentUserData.role === ClubRole.LEADER || 
+      currentUserData.role === ClubRole.CAPTAIN;
+  
+    if (!hasAuthority) {
+      throw new Error("You don't have permission to cancel this invite.");
+    }
+  
+    // 3. Törlés
+    await deleteDoc(memberRef);
   }

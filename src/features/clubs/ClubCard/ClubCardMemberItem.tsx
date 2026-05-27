@@ -8,6 +8,8 @@ import { ClubRole } from '../../../../types/club-types'
 import { roleAvatarRings, roleLabels, roleRowStyles, roleStyles } from './roles'
 import ClubMemberDropdown from './ClubMemberDropdown'
 import ClubInvitationDropdown from './ClubInvitationDropdown'
+import { useUser } from '../../../../hooks/use-user'
+import { useClub, useClubs } from '../../../../hooks/use-club'
 
 interface ClubCardMemberItemProps {
   member: ClubMember
@@ -28,6 +30,13 @@ const ClubCardMemberItem: FC<ClubCardMemberItemProps> = ({
   isInvitation,
 }) => {
   const RoleIcon = roleIcons[member.role]
+
+  const { user } = useUser()
+  const { leaveClub } = useClubs(user)
+  const { promoteClubMember, demoteClubMember, cancelInvite } = useClub(  
+    member.clubId,
+    user?.id ?? '',
+  )
 
   return (
     <div
@@ -77,9 +86,28 @@ const ClubCardMemberItem: FC<ClubCardMemberItemProps> = ({
         </Badge>
       )}
       {isInvitation ? (
-        <ClubInvitationDropdown member={member} onCancel={() => {}} />
+        <ClubInvitationDropdown
+          member={member}
+          onCancel={() =>
+            cancelInvite({ membershipId: member.id })
+          }
+        />
       ) : (
-        <ClubMemberDropdown member={member} onRemove={() => {}} />
+        <ClubMemberDropdown
+          member={member}
+          onRemove={() => {}}
+          onLeave={() => leaveClub({ clubId: member.clubId })}
+          onPromoteToCaptain={() =>
+            promoteClubMember({
+              membershipId: member.id,
+            })
+          }
+          onDemoteToMember={() =>
+            demoteClubMember({
+              membershipId: member.id,
+            })
+          }
+        />
       )}
     </div>
   )

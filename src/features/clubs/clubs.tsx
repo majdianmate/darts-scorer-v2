@@ -3,6 +3,7 @@ import { useClubs } from '../../../hooks/use-club'
 import { ScrollArea } from '#/components/ui/scroll-area'
 import CreateClubDialog from './ClubCreator/CreateClubDialog'
 import ClubCard from './ClubCard/ClubCard'
+import ClubInvites from './ClubInvites/ClubInvites'
 
 const Clubs = () => {
   const { user } = useUser()
@@ -16,12 +17,12 @@ const Clubs = () => {
     return <p className="text-sm text-muted-foreground">Loading clubs…</p>
   }
 
-  console.log('clubs', clubs)
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Clubs</h2>
         <div className="flex justify-end gap-2">
+          <ClubInvites />
           <CreateClubDialog />
         </div>
       </div>
