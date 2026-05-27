@@ -15,6 +15,7 @@ import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as protectedLayoutFriendsRouteImport } from './routes/(protected)/_layout.friends'
+import { Route as protectedLayoutClubsRouteImport } from './routes/(protected)/_layout.clubs'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,12 +46,18 @@ const protectedLayoutFriendsRoute = protectedLayoutFriendsRouteImport.update({
   path: '/friends',
   getParentRoute: () => protectedLayoutRoute,
 } as any)
+const protectedLayoutClubsRoute = protectedLayoutClubsRouteImport.update({
+  id: '/clubs',
+  path: '/clubs',
+  getParentRoute: () => protectedLayoutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
+  '/clubs': typeof protectedLayoutClubsRoute
   '/friends': typeof protectedLayoutFriendsRoute
 }
 export interface FileRoutesByTo {
@@ -58,6 +65,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
+  '/clubs': typeof protectedLayoutClubsRoute
   '/friends': typeof protectedLayoutFriendsRoute
 }
 export interface FileRoutesById {
@@ -67,13 +75,20 @@ export interface FileRoutesById {
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(protected)/_layout': typeof protectedLayoutRouteWithChildren
+  '/(protected)/_layout/clubs': typeof protectedLayoutClubsRoute
   '/(protected)/_layout/friends': typeof protectedLayoutFriendsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/friends'
+  fullPaths:
+    | '/'
+    | '/forgot-password'
+    | '/sign-in'
+    | '/sign-up'
+    | '/clubs'
+    | '/friends'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/friends'
+  to: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/clubs' | '/friends'
   id:
     | '__root__'
     | '/'
@@ -81,6 +96,7 @@ export interface FileRouteTypes {
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
     | '/(protected)/_layout'
+    | '/(protected)/_layout/clubs'
     | '/(protected)/_layout/friends'
   fileRoutesById: FileRoutesById
 }
@@ -136,14 +152,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof protectedLayoutFriendsRouteImport
       parentRoute: typeof protectedLayoutRoute
     }
+    '/(protected)/_layout/clubs': {
+      id: '/(protected)/_layout/clubs'
+      path: '/clubs'
+      fullPath: '/clubs'
+      preLoaderRoute: typeof protectedLayoutClubsRouteImport
+      parentRoute: typeof protectedLayoutRoute
+    }
   }
 }
 
 interface protectedLayoutRouteChildren {
+  protectedLayoutClubsRoute: typeof protectedLayoutClubsRoute
   protectedLayoutFriendsRoute: typeof protectedLayoutFriendsRoute
 }
 
 const protectedLayoutRouteChildren: protectedLayoutRouteChildren = {
+  protectedLayoutClubsRoute: protectedLayoutClubsRoute,
   protectedLayoutFriendsRoute: protectedLayoutFriendsRoute,
 }
 

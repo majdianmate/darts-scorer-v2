@@ -8,6 +8,7 @@ import {
 } from 'react'
 
 import type { User } from '../../../types/user-types'
+import { cn } from '#/lib/utils.ts'
 import UserPickerOption from './UserPickerOption'
 import UserPickerSelectedTags from './UserPickerSelectedTags'
 
@@ -40,6 +41,8 @@ export interface UserPickerProps {
   emptyMessage?: string
   showSelectedTags?: boolean
   maxListHeight?: string
+  /** When true, the list grows to fill remaining height and scrolls internally. */
+  fillHeight?: boolean
   className?: string
   excludeUserIds?: string[]
 }
@@ -55,6 +58,7 @@ const UserPicker = ({
   emptyMessage = 'No users found.',
   showSelectedTags = true,
   maxListHeight = '18rem',
+  fillHeight = false,
   className = '',
   excludeUserIds,
 }: UserPickerProps) => {
@@ -173,7 +177,13 @@ const UserPicker = ({
     trimmedTerm.length < GLOBAL_MIN_SEARCH_LENGTH
 
   return (
-    <div className={`flex flex-col gap-3 ${className}`}>
+    <div
+      className={cn(
+        'flex flex-col gap-3',
+        fillHeight && 'h-full min-h-0',
+        className,
+      )}
+    >
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
@@ -199,8 +209,11 @@ const UserPicker = ({
       )}
 
       <div
-        className="flex flex-col gap-1 overflow-y-auto rounded-lg border border-border/60 bg-muted/10 p-1"
-        style={{ maxHeight: maxListHeight }}
+        className={cn(
+          'flex flex-col gap-1 overflow-y-auto rounded-lg border border-border/60 bg-muted/10 p-1',
+          fillHeight && 'min-h-0 flex-1',
+        )}
+        style={fillHeight ? undefined : { maxHeight: maxListHeight }}
       >
         {idleHint && (
           <p className="px-2 py-6 text-center text-xs text-muted-foreground">
