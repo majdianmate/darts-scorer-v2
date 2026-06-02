@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, type ReactElement, type ReactNode } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -19,13 +19,21 @@ import { useClubs } from '../../../../hooks/use-club'
 
 interface CreateClubDialogProps {
   trigger?: ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-const CreateClubDialog = ({ trigger }: CreateClubDialogProps) => {
+const CreateClubDialog = ({
+  trigger,
+  open: openProp,
+  onOpenChange,
+}: CreateClubDialogProps) => {
   const { user } = useUser()
   const { createClub } = useClubs(user ?? null)
 
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = openProp !== undefined
+  const open = isControlled ? openProp : internalOpen
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedUsers, setSelectedUsers] = useState<User[]>([])
@@ -41,11 +49,12 @@ const CreateClubDialog = ({ trigger }: CreateClubDialogProps) => {
     setName('')
     setDescription('')
     setSelectedUsers([])
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
-    setOpen(nextOpen)
+    if (!isControlled) setInternalOpen(nextOpen)
+    onOpenChange?.(nextOpen)
 
     if (!nextOpen) {
       setName('')
@@ -63,7 +72,11 @@ const CreateClubDialog = ({ trigger }: CreateClubDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={trigger ?? defaultTrigger} />
+      {trigger ? (
+        <DialogTrigger render={trigger as ReactElement} />
+      ) : !isControlled ? (
+        <DialogTrigger render={defaultTrigger} />
+      ) : null}
       <DialogContent className="flex max-h-[min(720px,calc(100vh-2rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
         <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
           <DialogTitle>Create club</DialogTitle>
