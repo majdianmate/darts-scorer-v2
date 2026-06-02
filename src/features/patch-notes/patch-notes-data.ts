@@ -12,13 +12,57 @@ export type PatchNoteRelease = {
   changes: PatchNoteChange[]
 }
 
-/** Pre-1.0 release history derived from project milestones and git history. */
+/** Release history derived from project milestones and git history. */
 export const PATCH_NOTE_RELEASES: PatchNoteRelease[] = [
+  {
+    version: '1.0.0',
+    title: 'First stable release',
+    date: 'June 2026',
+    badge: 'latest',
+    summary:
+      'Darts Scorer 1.0 brings a polished match experience, club management, and in-match analytics — ready for everyday use.',
+    changes: [
+      {
+        label: 'Added',
+        items: [
+          'Match Statistics tab: bar and area charts with team colours',
+          'Stats comparison modes: single team, head-to-head, or all players',
+          'Match stats table with per-player metrics and best-value highlights',
+          'Segmented controls for team, player, chart type, and comparison',
+          'Rich chart tooltips with side-by-side player stat cards',
+          'Global page header: sidebar toggle, page title, and toolbar on one row',
+          'Club page title synced to the app header',
+          'Expanded squad icon picker (~70 Lucide icons)',
+        ],
+      },
+      {
+        label: 'Improved',
+        items: [
+          'Live match team cards: minimalist layout, depth, and team-coloured accents',
+          'Active team card: rotating accent border and ambient colour orbs',
+          'Active player: team-coloured ring plus rotating dashed turn indicator',
+          'Scrollable stats area on team cards with hidden scrollbar',
+          'Club cards: accordion sections with distinct colours (members, invites, squads)',
+          'Sidebar user menu opens upward; grouped menu items',
+          'Match first-9 dart average computed across all legs (not only the current leg)',
+          'Help and Patch notes pages kept in sync with the app shell',
+        ],
+      },
+      {
+        label: 'Fixed',
+        items: [
+          'Rotating team-card border clipped to the card edge (no bleed on page background)',
+          'Vertical separator alignment in the page header',
+          'Dropdown menu context error in the sidebar user panel',
+        ],
+      },
+    ],
+  },
   {
     version: '0.9.0',
     title: 'Navigation & polish',
     date: 'June 2026',
-    badge: 'latest',
+    badge: 'release',
     summary:
       'App shell improvements before 1.0: sidebar navigation, theme switching, and clearer entry points across the app.',
     changes: [
@@ -218,7 +262,7 @@ export const PATCH_NOTE_RELEASES: PatchNoteRelease[] = [
 ]
 
 export const PATCH_NOTES_HEADLINE = {
-  currentVersion: '0.9.x',
-  targetVersion: '1.0',
-  tagline: 'Building toward the first stable release.',
+  currentVersion: '1.0.0',
+  tagline:
+    'First stable release — live scoring, clubs, squads, and match analytics.',
 }

@@ -18,10 +18,6 @@ const PatchNotes: FC = () => {
               <span className="font-medium text-foreground">
                 v{PATCH_NOTES_HEADLINE.currentVersion}
               </span>
-              , working toward{' '}
-              <span className="font-medium text-foreground">
-                v{PATCH_NOTES_HEADLINE.targetVersion}
-              </span>
               .
             </p>
           </div>
