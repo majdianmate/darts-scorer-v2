@@ -6,19 +6,26 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
-import { cn } from '#/lib/utils.ts'
-import { Users } from 'lucide-react'
 import type { ClubMember } from '../../../../types/club-types'
-import ClubCardMemberItem from './ClubCardMemberItem'
 import AvatarGroup from '#/components/AvatarGroup'
 import { sortMembersByRole } from './roles'
 import ClubCardMemberList from './ClubCardMemberList'
+import {
+  clubCardSectionContentClass,
+  clubCardSectionIconClass,
+  clubCardSectionIconWrapClass,
+  clubCardSectionShellClass,
+  clubCardSectionStripeClass,
+  clubCardSectionTriggerClass,
+  getClubCardSectionTone,
+} from './club-card-section-styles'
 
 interface ClubCardMembersProps {
   members: ClubMember[]
 }
 
 const ClubCardMembers: FC<ClubCardMembersProps> = ({ members }) => {
+  const tone = getClubCardSectionTone('members')
   const sortedMembers = useMemo(
     () => sortMembersByRole(members),
     [members],
@@ -27,17 +34,16 @@ const ClubCardMembers: FC<ClubCardMembersProps> = ({ members }) => {
   const memberCount = members.length
 
   return (
-    <Accordion className="overflow-hidden rounded-xl border border-border/70 bg-linear-to-b from-muted/30 to-background shadow-sm">
+    <Accordion className={clubCardSectionShellClass}>
       <AccordionItem value="members" className="border-0">
-        <AccordionTrigger
-          className={cn(
-            'items-center gap-3 px-3 py-3 hover:no-underline',
-            '[&_[data-slot=accordion-trigger-icon]]:mt-0',
-          )}
-        >
+        <AccordionTrigger className={clubCardSectionTriggerClass}>
+          <span
+            className={clubCardSectionStripeClass('members')}
+            aria-hidden
+          />
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/80 shadow-sm">
-              <Users className="size-4 text-muted-foreground" />
+            <div className={clubCardSectionIconWrapClass('members')}>
+              <tone.Icon className={clubCardSectionIconClass('members')} />
             </div>
 
             <div className="min-w-0 text-left">
@@ -62,7 +68,7 @@ const ClubCardMembers: FC<ClubCardMembersProps> = ({ members }) => {
           />
         </AccordionTrigger>
 
-        <AccordionContent className="px-3 pb-3">
+        <AccordionContent className={clubCardSectionContentClass}>
           <ClubCardMemberList members={sortedMembers} />
         </AccordionContent>
       </AccordionItem>

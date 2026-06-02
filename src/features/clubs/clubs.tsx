@@ -11,6 +11,7 @@ import ClubEditor from './ClubEditor/ClubEditor'
 import SquadCreator from './SquadSystem/SquadCreator/SquadCreator'
 import SquadEditor from './SquadSystem/SquadEditor/SquadEditor'
 import MatchConfigDialog from '../match/MatchConfig/MatchConfigDialog'
+import PageHeaderToolbar from '#/components/Sidebar/PageHeaderToolbar'
 
 const Clubs = () => {
   const { user } = useUser()
@@ -38,25 +39,25 @@ const Clubs = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-lg border border-border/60 bg-muted/30">
-            <Building2 className="size-4 text-muted-foreground" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Clubs</h2>
-            <p className="text-sm text-muted-foreground">
+      <PageHeaderToolbar>
+        <>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/30">
+              <Building2 className="size-4 text-muted-foreground" />
+            </div>
+            <p className="truncate text-sm text-muted-foreground">
               {clubs.length === 0
                 ? 'Create a club to play with your group'
                 : `${clubs.length} club${clubs.length === 1 ? '' : 's'}`}
             </p>
           </div>
-        </div>
-        <div className="flex shrink-0 justify-end gap-2">
-          <ClubInvites />
-          <CreateClubDialog />
-        </div>
-      </div>
+          <div className="flex-1" />
+          <div className="flex shrink-0 items-center gap-2">
+            <ClubInvites />
+            <CreateClubDialog />
+          </div>
+        </>
+      </PageHeaderToolbar>
 
       {clubs.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 px-6 py-16 text-center">
@@ -77,7 +78,7 @@ const Clubs = () => {
           </div>
         </div>
       ) : (
-        <ScrollArea className="h-[calc(100vh-100px)] [scrollbar-gutter:stable] pr-4">
+        <ScrollArea className="h-[calc(100vh-3.5rem-3rem)] [scrollbar-gutter:stable] pr-4">
           <div className="grid grid-cols-1 gap-4 pb-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 p-2">
             {clubs.map((club) => (
               <ClubCard key={club.id} club={club} />

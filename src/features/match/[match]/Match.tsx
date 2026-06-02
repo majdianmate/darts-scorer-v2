@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { useSelector } from '@tanstack/react-store'
-import { Loader2, Settings, Undo2 } from 'lucide-react'
+import { ChartArea, Loader2, Settings, Undo2 } from 'lucide-react'
 import { Route } from '@/routes/(protected)/_layout.match.$matchId'
 import { Button } from '#/components/ui/button'
 import { cn } from '#/lib/utils'
@@ -8,6 +8,13 @@ import { isMatchEnded } from '#/utils/match-leg-utils'
 import { useMatch, useMatchSubscription } from '../../../../hooks/use-match'
 import { useUser } from '../../../../hooks/use-user'
 import { useClub } from '../../../../hooks/use-club'
+import {
+  Tabs,
+  TabsContent,
+  TabsContents,
+  TabsList,
+  TabsTrigger,
+} from '@/components/animate-ui/components/animate/tabs'
 import {
   canUndoLastScore,
   clearMatchStore,
@@ -19,6 +26,7 @@ import TeamCard from './TeamCard/TeamCard'
 import ScoreInput from './ScoreInput'
 import MatchWinDialog from './MatchWinDialog'
 import ScoreDisplay from './ScoreDisplay'
+import MatchStatistics from './Statistics/MatchStatistics'
 
 const Match = () => {
   const { matchId } = Route.useParams()
@@ -79,8 +87,7 @@ const Match = () => {
   return (
     <div
       className={cn(
-        'mx-auto flex h-full w-full flex-col gap-2',
-        teams.length === 2 && 'max-w-4xl',
+        'relative mx-auto flex h-full w-full flex-col gap-2',
       )}
     >
       <MatchWinDialog
@@ -90,7 +97,7 @@ const Match = () => {
         onClose={() => setWinDialogDismissed(true)}
       />
 
-      <div className="flex gap-2 self-end">
+      <div className="absolute flex gap-2 self-end">
         <Button
           variant="outline"
           disabled={!canUndo || isUndoing || matchEnded}
@@ -104,13 +111,26 @@ const Match = () => {
         </Button>
       </div>
 
-      <div className="flex h-full w-full justify-center gap-4">
-        {teams.map((team) => (
-          <TeamCard key={team.id} team={team} />
-        ))}
-      </div>
-      <ScoreInput disabled={matchEnded} />
-      <ScoreDisplay />
+      <Tabs>
+        <TabsList defaultValue="match" className="self-center">
+          <TabsTrigger value="match">Match</TabsTrigger>
+          <TabsTrigger value="statistics">Statistics</TabsTrigger>
+        </TabsList>
+        <TabsContents>
+          <TabsContent value="match">
+            <div className="flex h-full min-h-0 w-full justify-center gap-4">
+              {teams.map((team) => (
+                <TeamCard key={team.id} team={team} />
+              ))}
+            </div>
+            <ScoreInput disabled={matchEnded} />
+            <ScoreDisplay />
+          </TabsContent>
+          <TabsContent value="statistics">
+            <MatchStatistics match={storeMatch} />
+          </TabsContent>
+        </TabsContents>
+      </Tabs>
     </div>
   )
 }

@@ -1,12 +1,12 @@
 import { type FC } from 'react'
 
-import Avatar from '#/components/Avatar'
 import { cn } from '#/lib/utils'
 
 import type { PlayerLocal, TeamLocal } from '../../../../../types/match-types'
 import { setCurrentPlayerId } from '../../../../../store/match-store'
 
 import { getMemberDisplayName } from './team-card-utils'
+import TeamCardPlayerAvatar from './TeamCardPlayerAvatar'
 
 interface TeamCardPlayerProps {
   player: PlayerLocal
@@ -15,7 +15,12 @@ interface TeamCardPlayerProps {
   accent: string
 }
 
-const TeamCardPlayer: FC<TeamCardPlayerProps> = ({ player, team, isActive, accent }) => {
+const TeamCardPlayer: FC<TeamCardPlayerProps> = ({
+  player,
+  team,
+  isActive,
+  accent,
+}) => {
   const name = getMemberDisplayName(player)
   const firstName = name.split(' ')[0]
 
@@ -30,48 +35,35 @@ const TeamCardPlayer: FC<TeamCardPlayerProps> = ({ player, team, isActive, accen
         onClick()
       }}
     >
-      <div
-        className={cn(
-          'rounded-full p-0.5 transition-all duration-300',
-          isActive && 'scale-110',
-        )}
-        style={
-          isActive
-            ? {
-                background: `linear-gradient(135deg, ${accent}, ${accent}60)`,
-                boxShadow: `0 0 20px ${accent}50`,
-              }
-            : undefined
-        }
-      >
-        <Avatar
-          name={name}
-          image={player.user.image}
-          size="lg"
-          className={cn(
-            'h-14 w-14 border-2 border-white/10 text-base',
-            !isActive && 'opacity-70',
-          )}
-        />
-      </div>
+      <TeamCardPlayerAvatar
+        name={name}
+        image={player.user.image}
+        isActive={isActive}
+        accent={accent}
+        size="lg"
+      />
 
       <p
         className={cn(
-          'max-w-[96px] truncate text-sm',
-          isActive ? 'font-semibold text-white/95' : 'text-white/45',
+          'max-w-[96px] truncate text-sm tracking-tight',
+          isActive ? 'font-semibold text-white/90' : 'font-medium text-white/40',
         )}
       >
         {firstName}
       </p>
 
-      <div className="flex items-center gap-2 text-xs font-bold tabular-nums">
-        <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.55)' }}>
-          <span className="mr-0.5 text-[10px] font-medium uppercase text-white/30">Leg</span>
+      <div className="flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] font-semibold tabular-nums shadow-[0_1px_0_rgba(255,255,255,0.04)_inset]">
+        <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.45)' }}>
+          <span className="mr-0.5 text-[9px] font-medium uppercase tracking-wide text-white/25">
+            Leg
+          </span>
           {player.legAverage.toFixed(1)}
         </span>
-        <span className="text-white/15">·</span>
-        <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.55)' }}>
-          <span className="mr-0.5 text-[10px] font-medium uppercase text-white/30">Game</span>
+        <span className="text-white/12">·</span>
+        <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.45)' }}>
+          <span className="mr-0.5 text-[9px] font-medium uppercase tracking-wide text-white/25">
+            Game
+          </span>
           {player.gameAverage.toFixed(1)}
         </span>
       </div>

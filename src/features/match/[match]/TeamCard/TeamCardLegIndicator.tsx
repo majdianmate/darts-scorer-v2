@@ -1,6 +1,6 @@
 import { type FC } from 'react'
 
-import { cn } from '#/lib/utils'
+import { accentAlpha } from './team-card-utils'
 
 interface TeamCardLegIndicatorProps {
   legsWon: number
@@ -15,31 +15,33 @@ const TeamCardLegIndicator: FC<TeamCardLegIndicatorProps> = ({
 }) => {
   if (legsToWin <= 0) return null
 
-  const hasWon = legsWon >= legsToWin
-
   return (
-    <div className="flex w-full gap-1">
+    <div className="flex items-center justify-center w-full gap-1.5 ">
       {Array.from({ length: legsToWin }).map((_, index) => {
         const isFilled = index < legsWon
 
         return (
           <div
             key={index}
-            className={cn(
-              'h-1.5 min-w-0 flex-1 rounded-full transition-all duration-300',
-              !isFilled && 'bg-white/12',
-            )}
-            style={
-              isFilled
-                ? {
-                    backgroundColor: accent,
-                    boxShadow: hasWon
-                      ? `0 0 10px ${accent}88`
-                      : `0 0 6px ${accent}55`,
-                  }
-                : undefined
-            }
-          />
+            className="h-1 min-w-0 w-10 overflow-hidden rounded-full transition-all duration-300"
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.08)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.2) inset',
+            }}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={
+                isFilled
+                  ? {
+                      width: '100%',
+                      background: accent,
+                      boxShadow: `0 0 8px ${accentAlpha(accent, '44')}`,
+                    }
+                  : { width: '0%' }
+              }
+            />
+          </div>
         )
       })}
     </div>

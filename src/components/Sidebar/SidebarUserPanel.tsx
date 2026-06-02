@@ -1,9 +1,17 @@
-import { type FC, useState } from 'react'
+import { type FC } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { ChevronUp, Loader2, LogOut } from 'lucide-react'
 
 import Avatar from '#/components/Avatar'
-import { Button } from '#/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '#/components/ui/dropdown-menu'
 import { cn } from '#/lib/utils'
 import { useUser } from '../../../hooks/use-user'
 import type { User } from '../../../types/user-types'
@@ -14,7 +22,6 @@ type SidebarUserPanelProps = {
 }
 
 const SidebarUserPanel: FC<SidebarUserPanelProps> = ({ user, collapsed }) => {
-  const [expanded, setExpanded] = useState(false)
   const { logout, isLogoutLoading } = useUser()
   const navigate = useNavigate()
 
@@ -23,63 +30,78 @@ const SidebarUserPanel: FC<SidebarUserPanelProps> = ({ user, collapsed }) => {
     void navigate({ to: '/sign-in' })
   }
 
-  if (collapsed) {
-    return (
-      <div className="flex justify-center border-t border-sidebar-border p-2">
-        <Avatar name={user.name} image={user.image} size="sm" />
-      </div>
-    )
-  }
+  const triggerClassName = collapsed
+    ? 'flex size-10 items-center justify-center rounded-lg outline-none hover:bg-sidebar-accent/50 data-popup-open:bg-sidebar-accent/30'
+    : cn(
+        'flex w-full items-center gap-2.5 rounded-none px-3 py-3 text-left outline-none',
+        'hover:bg-sidebar-accent/50 data-popup-open:bg-sidebar-accent/30',
+      )
 
   return (
-    <div className="border-t border-sidebar-border">
-      <button
-        type="button"
-        onClick={() => setExpanded((current) => !current)}
-        className={cn(
-          'flex w-full items-center gap-2.5 px-3 py-3 text-left transition-colors',
-          'hover:bg-sidebar-accent/50',
-          expanded && 'bg-sidebar-accent/30',
-        )}
-        aria-expanded={expanded}
-      >
-        <Avatar name={user.name} image={user.image} size="sm" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-sidebar-foreground">
-            {user.name}
-          </p>
-          {user.username ? (
-            <p className="truncate text-xs text-sidebar-foreground/50">
-              @{user.username}
-            </p>
-          ) : null}
-        </div>
-        <ChevronUp
-          className={cn(
-            'size-4 shrink-0 text-sidebar-foreground/45 transition-transform',
-            !expanded && 'rotate-180',
-          )}
+    <div className="border-t border-sidebar-border p-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <button
+              type="button"
+              className={triggerClassName}
+              aria-label="Account menu"
+            >
+              <Avatar name={user.name} image={user.image} size="sm" />
+              {!collapsed ? (
+                <>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-sidebar-foreground">
+                      {user.name}
+                    </p>
+                    {user.username ? (
+                      <p className="truncate text-xs text-sidebar-foreground/50">
+                        @{user.username}
+                      </p>
+                    ) : null}
+                  </div>
+                  <ChevronUp className="size-4 shrink-0 text-sidebar-foreground/45 transition-transform data-popup-open:rotate-180" />
+                </>
+              ) : null}
+            </button>
+          }
         />
-      </button>
 
-      {expanded ? (
-        <div className="border-t border-sidebar-border/60 px-2 pb-2 pt-1">
-          <Button
-            type="button"
-            variant="ghost"
-            className="w-full justify-start gap-2 text-sidebar-foreground/80"
-            disabled={isLogoutLoading}
-            onClick={() => void handleLogout()}
-          >
-            {isLogoutLoading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <LogOut className="size-4" />
-            )}
-            Log out
-          </Button>
-        </div>
-      ) : null}
+        <DropdownMenuContent
+          side="top"
+          align={collapsed ? 'center' : 'start'}
+          sideOffset={6}
+          className="min-w-[calc(var(--anchor-width)+0.5rem)]"
+        >
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="font-normal">
+              <p className="truncate text-sm font-medium text-foreground">
+                {user.name}
+              </p>
+              {user.username ? (
+                <p className="truncate text-xs text-muted-foreground">
+                  @{user.username}
+                </p>
+              ) : null}
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={isLogoutLoading}
+              onClick={() => void handleLogout()}
+            >
+              {isLogoutLoading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <LogOut className="size-4" />
+              )}
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

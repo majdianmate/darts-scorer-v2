@@ -17,6 +17,15 @@ import TeamCardScore from './TeamCardScore'
 import TeamCardPlayers from './TeamCardPlayers'
 
 import TeamCardStats from './TeamCardStats'
+import TeamCardAmbientOrbs from './TeamCardAmbientOrbs'
+import TeamCardRotatingBorder from './TeamCardRotatingBorder'
+import {
+  teamCardAccentRailStyle,
+  teamCardInnerRingClass,
+  teamCardShellFaceStyle,
+  teamCardShellStyle,
+  teamCardWatermarkStyle,
+} from './team-card-utils'
 
 interface TeamCardProps {
   team: TeamLocal
@@ -37,71 +46,46 @@ const TeamCard: FC<TeamCardProps> = ({ team }) => {
 
   return (
     <div
-      className={cn(
-        'relative h-full min-h-0 w-full cursor-pointer overflow-hidden rounded-[28px] border border-white/10 transition-all duration-300',
-
-        isCurrentTeam
-          ? `scale-[1.005] border-${team.color}20`
-          : `border-${team.color}8`,
-      )}
-      style={{
-        boxShadow: isCurrentTeam
-          ? `0 0 48px ${accent}55, 0 20px 56px rgba(0,0,0,0.5)`
-          : `0 0 24px ${accent}28, 0 16px 48px rgba(0,0,0,0.45)`,
-      }}
+      className="relative flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl"
       onClick={onClick}
     >
+      {isCurrentTeam ? <TeamCardRotatingBorder accent={accent} /> : null}
+
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 overflow-hidden"
+        className={cn(
+          'group relative z-[1] flex min-h-0 w-full flex-1 cursor-pointer flex-col overflow-hidden transition-[transform,box-shadow,border-color] duration-300 ease-out',
+          isCurrentTeam
+            ? 'm-[2px] rounded-[calc(1rem-2px)]'
+            : 'rounded-2xl border',
+        )}
+        style={teamCardShellStyle(accent, isCurrentTeam)}
       >
-        <div
-          className="absolute -left-[20%] -top-[25%] h-[80%] w-[85%] rounded-full blur-[64px]"
-          style={{ background: accent, opacity: isCurrentTeam ? 0.88 : 0 }}
-        />
-
-        <div
-          className="absolute -bottom-[30%] -right-[15%] h-[75%] w-[80%] rounded-full blur-[48px]"
-          style={{
-            background: accent,
-            opacity: isCurrentTeam ? 0.58 : 0,
-          }}
-        />
-
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(165deg, ${accent}38 0%, transparent 50%, ${accent}1a 100%)`,
-          }}
-        />
-      </div>
-
       {isCurrentTeam ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: `radial-gradient(ellipse 90% 70% at 50% 0%, ${accent}44, transparent 72%)`,
-          }}
+          className="pointer-events-none absolute inset-0 z-0 rounded-[calc(1rem-2px)]"
+          style={teamCardShellFaceStyle(accent, true)}
         />
-      ) : (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: `radial-gradient(ellipse 80% 60% at 50% 20%, ${accent}1a, transparent 70%)`,
-          }}
-        />
-      )}
+      ) : null}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-4 top-0 h-px"
+        style={teamCardAccentRailStyle(accent, isCurrentTeam)}
+      />
 
-      <div className="pointer-events-none absolute inset-0 bg-[#0a0a0d]/72" />
+      <div
+        aria-hidden
+        className={cn(
+          'pointer-events-none absolute inset-0',
+          isCurrentTeam ? 'rounded-[calc(1rem-2px)]' : 'rounded-2xl',
+          teamCardInnerRingClass(isCurrentTeam),
+        )}
+      />
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.14] via-white/[0.05] to-transparent" />
+      {isCurrentTeam ? <TeamCardAmbientOrbs accent={accent} /> : null}
 
-      <div className="pointer-events-none absolute inset-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]" />
-
-      <div className="relative flex h-full min-h-0 flex-col">
-        <div className="relative z-10 shrink-0 px-4 pt-4">
+      <div className="relative z-[1] flex h-full min-h-0 flex-col">
+        <div className="relative z-10 shrink-0 border-b border-white/[0.05] px-4 py-3.5">
           <TeamCardTopBar team={team} isCurrentTeam={isCurrentTeam} />
         </div>
 
@@ -111,35 +95,13 @@ const TeamCard: FC<TeamCardProps> = ({ team }) => {
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
           >
             <TeamIcon
-              className="absolute blur-3xl"
               strokeWidth={1.25}
-              style={{
-                color: accent,
-
-                opacity: isCurrentTeam ? 0.78 : 0.48,
-
-                width: 'clamp(10rem, 34vh, 18rem)',
-
-                height: 'clamp(10rem, 34vh, 18rem)',
-              }}
-            />
-
-            <TeamIcon
-              strokeWidth={1}
-              style={{
-                color: `${accent}${isCurrentTeam ? '77' : '55'}`,
-
-                width: 'clamp(10rem, 34vh, 18rem)',
-
-                height: 'clamp(10rem, 34vh, 18rem)',
-
-                filter: `drop-shadow(0 0 24px ${accent}88)`,
-                opacity: isCurrentTeam ? 0.78 : 0.2,
-              }}
+              className="size-[clamp(9rem,32vh,16rem)]"
+              style={teamCardWatermarkStyle(accent, isCurrentTeam)}
             />
           </div>
 
-          <div className="relative z-10 flex min-h-0 flex-1 flex-col px-4 pb-4">
+          <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-3 pt-1">
             <TeamCardScore team={team} accent={accent} />
 
             <TeamCardPlayers team={team} accent={accent} />
@@ -147,6 +109,7 @@ const TeamCard: FC<TeamCardProps> = ({ team }) => {
             <TeamCardStats team={team} accent={accent} />
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

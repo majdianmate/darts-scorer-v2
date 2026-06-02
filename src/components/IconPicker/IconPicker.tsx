@@ -57,9 +57,9 @@ function IconPicker({
         }
       />
 
-      <PopoverContent align="start" className="w-64 gap-3 p-3">
+      <PopoverContent align="start" className="w-80 gap-3 p-3">
         <p className="text-xs font-medium text-foreground">Choose an icon</p>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-7 gap-2">
           {SQUAD_ICON_KEYS.map((iconKey) => {
             const Icon = getSquadIcon(iconKey)
             const isSelected = selectedKey === iconKey

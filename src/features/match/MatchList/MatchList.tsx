@@ -6,6 +6,7 @@ import { useClubs } from "../../../../hooks/use-club";
 import { useUserMatches } from "../../../../hooks/use-match";
 import { useUser } from "../../../../hooks/use-user";
 import MatchListItem from "./MatchListItem";
+import PageHeaderToolbar from "#/components/Sidebar/PageHeaderToolbar";
 
 const MatchList = () => {
   const { user } = useUser();
@@ -39,19 +40,18 @@ const MatchList = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2.5">
-        <div className="flex size-9 items-center justify-center rounded-lg border border-border/60 bg-muted/30">
-          <Target className="size-4 text-muted-foreground" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Matches</h2>
-          <p className="text-sm text-muted-foreground">
+      <PageHeaderToolbar>
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/30">
+            <Target className="size-4 text-muted-foreground" />
+          </div>
+          <p className="truncate text-sm text-muted-foreground">
             {matches.length === 0
               ? "Matches you play in will show up here"
               : `${matches.length} match${matches.length === 1 ? "" : "es"}`}
           </p>
         </div>
-      </div>
+      </PageHeaderToolbar>
 
       {matches.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 px-6 py-16 text-center">

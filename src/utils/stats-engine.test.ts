@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import type { Score } from '../../types/match-types'
 
 import {
+  computeMatchFirstNineDartsAverage,
   computeThreeDartAverage,
   FirstNineTracker,
   StatsManager,
@@ -74,6 +75,23 @@ describe('StatsManager', () => {
     expect(snapshot.legAverages).toEqual([90])
     expect(snapshot.legAverage).toBe(60)
     expect(snapshot.gameAverage).toBe(75)
+  })
+
+  it('stores per-leg first nine averages for match-wide computation', () => {
+    const manager = new StatsManager()
+
+    manager.processNewScore(makeScore({ score: 60, dartsThrown: 3 }))
+    manager.processNewScore(makeScore({ score: 60, dartsThrown: 3 }))
+    manager.processNewScore(makeScore({ score: 60, dartsThrown: 3 }))
+    manager.handleLegEnd()
+
+    manager.processNewScore(makeScore({ score: 90, dartsThrown: 3 }))
+    manager.processNewScore(makeScore({ score: 90, dartsThrown: 3 }))
+    manager.processNewScore(makeScore({ score: 90, dartsThrown: 3 }))
+    manager.handleLegEnd()
+
+    expect(manager.firstNineLegAverages).toEqual([60, 90])
+    expect(computeMatchFirstNineDartsAverage(manager)).toBe(75)
   })
 })
 

@@ -11,6 +11,7 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { useMemo } from 'react'
+import { useSetPageTitle } from '#/hooks/use-set-page-title'
 import { useClub } from '../../../../hooks/use-club'
 import { Button, buttonVariants } from '#/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -35,6 +36,8 @@ const Club = () => {
     from: '/(protected)/_layout/clubs/$club',
   })
   const { club, isGetClubLoading, isGetClubError } = useClub(clubId)
+
+  useSetPageTitle(club?.name)
 
   const stats = useMemo(() => {
     if (!club) return null
@@ -119,8 +122,7 @@ const Club = () => {
             <Building2 className="size-5 text-muted-foreground" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-2xl font-bold tracking-tight">{club.name}</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-2">
               {club.description || 'No description yet.'}
             </p>
           </div>

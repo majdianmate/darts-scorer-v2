@@ -5,7 +5,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { cn } from '#/lib/utils.ts'
 import { getSquadIcon } from '#/components/IconPicker'
 import AvatarGroup from '#/components/AvatarGroup'
 import { useUser } from '../../../../hooks/use-user'
@@ -17,6 +16,11 @@ import {
 } from '../../../../store/store'
 import SquadDropdown from './SquadDropdown'
 import ClubCardSquadMemberItem from './ClubCardSquadMemberItem'
+import {
+  clubCardSquadContentClass,
+  clubCardSquadItemClass,
+  clubCardSquadTriggerClass,
+} from './club-card-section-styles'
 
 interface ClubCardSquadItemProps {
   squad: Squad
@@ -48,21 +52,26 @@ const ClubCardSquadItem: FC<ClubCardSquadItemProps> = ({ squad, rank }) => {
   return (
     <AccordionItem
       value={squad.id}
-      className={cn(
-        'overflow-hidden rounded-lg border border-b-0 transition-all duration-200',
-      )}
+      className={clubCardSquadItemClass}
       style={{
-        borderColor: `${squad.color}35`,
-        backgroundColor: `${squad.color}0c`,
+        borderColor: `${squad.color}40`,
       }}
     >
       <AccordionTrigger
-        className={cn(
-          'group items-center justify-start gap-2 px-2.5 py-2 hover:no-underline',
-          '[&_[data-slot=accordion-trigger-icon]]:mt-0',
-        )}
+        className={clubCardSquadTriggerClass}
+        style={
+          {
+            '--squad-accent': squad.color,
+          } as React.CSSProperties
+        }
       >
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+        <span
+          className="pointer-events-none absolute top-2 bottom-2 left-0 w-0.5 rounded-full"
+          style={{ backgroundColor: squad.color }}
+          aria-hidden
+        />
+
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-1">
           {rank !== undefined && (
             <div className="flex w-5 shrink-0 items-center justify-center">
               <span className="text-[10px] font-semibold tabular-nums text-muted-foreground/70">
@@ -72,10 +81,10 @@ const ClubCardSquadItem: FC<ClubCardSquadItemProps> = ({ squad, rank }) => {
           )}
 
           <div
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg border shadow-sm"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg border"
             style={{
-              backgroundColor: `${squad.color}22`,
-              borderColor: `${squad.color}45`,
+              backgroundColor: `${squad.color}18`,
+              borderColor: `${squad.color}50`,
               color: squad.color,
             }}
           >
@@ -116,8 +125,8 @@ const ClubCardSquadItem: FC<ClubCardSquadItemProps> = ({ squad, rank }) => {
       </AccordionTrigger>
 
       <AccordionContent
-        className="border-t px-2 pb-2 pt-1.5 [&_p]:mb-0"
-        style={{ borderColor: `${squad.color}25` }}
+        className={clubCardSquadContentClass}
+        style={{ borderColor: `${squad.color}30` }}
       >
         {memberCount === 0 ? (
           <p className="px-1 py-2 text-center text-xs text-muted-foreground">

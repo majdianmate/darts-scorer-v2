@@ -14,7 +14,7 @@ interface TeamCardPlayersProps {
 const TeamCardPlayers: FC<TeamCardPlayersProps> = ({ team, accent }) => {
 
   return (
-    <div className="flex items-center justify-center gap-[clamp(1rem,4.5vw,2rem)] py-4">
+    <div className="flex shrink-0 items-center justify-center gap-[clamp(1rem,4.5vw,2rem)] py-3">
       {team.members.map((player) => (
         <TeamCardPlayer
           key={player.id}

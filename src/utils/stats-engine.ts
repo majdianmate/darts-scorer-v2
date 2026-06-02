@@ -62,6 +62,10 @@ export class FirstNineTracker implements IStatTracker {
     return this.currentAverage
   }
 
+  public hasVisitsInCurrentLeg() {
+    return this.visitsInLeg > 0
+  }
+
   public nextLeg() {
     this.points = 0
     this.darts = 0
@@ -124,6 +128,8 @@ export class StatsManager {
 
   public bestCheckout = 0
   public legAverages: number[] = []
+  /** Per-leg firstNineDartsAverage values (first 3 visits each leg). */
+  public firstNineLegAverages: number[] = []
 
   public processNewScore(score: Score): Statistic {
     const stats: Statistic = {
@@ -148,6 +154,9 @@ export class StatsManager {
 
   public handleLegEnd() {
     this.legAverages.push(this.legAvg.getValue() as number)
+    if (this.firstNine.hasVisitsInCurrentLeg()) {
+      this.firstNineLegAverages.push(this.firstNine.getValue() as number)
+    }
     this.legAvg.reset()
     this.firstNine.nextLeg()
   }
@@ -165,4 +174,20 @@ export class StatsManager {
       legAverages: [...this.legAverages],
     }
   }
+}
+
+/** Match-wide mean of per-leg firstNineDartsAverage (same tracker rules as live stats). */
+export function computeMatchFirstNineDartsAverage(
+  manager: StatsManager,
+): number {
+  const legValues = [...manager.firstNineLegAverages]
+  if (manager.firstNine.hasVisitsInCurrentLeg()) {
+    legValues.push(manager.firstNine.getValue() as number)
+  }
+  if (legValues.length === 0) return 0
+  return parseFloat(
+    (legValues.reduce((sum, value) => sum + value, 0) / legValues.length).toFixed(
+      2,
+    ),
+  )
 }

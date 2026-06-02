@@ -1,15 +1,7 @@
-import { useEffect, useState, type FC } from 'react'
+import { useState, type FC } from 'react'
 import { useRouterState } from '@tanstack/react-router'
-import {
-  Building2,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Settings,
-  Target,
-  Users,
-} from 'lucide-react'
+import { Building2, Settings, Target, Users } from 'lucide-react'
 
-import { Button } from '#/components/ui/button'
 import { cn } from '#/lib/utils'
 import CreateClubDialog from '#/features/clubs/ClubCreator/CreateClubDialog'
 import { useClubs } from '../../../hooks/use-club'
@@ -24,28 +16,19 @@ import SidebarMenu from './SidebarMenu'
 import SidebarMenuItem from './SidebarMenuItem'
 import SidebarSecondaryMenu from './SidebarSecondaryMenu'
 import SidebarUserPanel from './SidebarUserPanel'
-import { isNavActive, readSidebarCollapsed, writeSidebarCollapsed } from './sidebar-utils'
+import { useSidebarLayout } from './SidebarLayoutContext'
+import { isNavActive } from './sidebar-utils'
 
 const Sidebar: FC = () => {
   const { user } = useUser()
   const { clubs, isGetClubsLoading, incomingClubInvites } = useClubs(user)
   const { pendingRequests } = useFriends(user?.id ?? '')
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
 
-  const [collapsed, setCollapsed] = useState(false)
+  const { collapsed } = useSidebarLayout()
   const [createClubOpen, setCreateClubOpen] = useState(false)
-
-  useEffect(() => {
-    setCollapsed(readSidebarCollapsed())
-  }, [])
-
-  const toggleCollapsed = () => {
-    setCollapsed((current) => {
-      const next = !current
-      writeSidebarCollapsed(next)
-      return next
-    })
-  }
 
   const clubInviteCount = incomingClubInvites?.length ?? 0
   const friendRequestCount = pendingRequests.length
@@ -59,19 +42,6 @@ const Sidebar: FC = () => {
         onOpenChange={setCreateClubOpen}
       />
 
-      {collapsed ? (
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-sm"
-          className="fixed left-3 top-3 z-40 shadow-md"
-          onClick={toggleCollapsed}
-          aria-label="Open sidebar"
-        >
-          <PanelLeftOpen className="size-4" />
-        </Button>
-      ) : null}
-
       <aside
         className={cn(
           'flex h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-200',
@@ -84,18 +54,10 @@ const Sidebar: FC = () => {
             <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
               <Target className="size-4" />
             </div>
-            <span className="truncate font-bold tracking-tight">Darts Scorer</span>
+            <span className="truncate font-bold tracking-tight">
+              Darts Scorer
+            </span>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="shrink-0 text-sidebar-foreground/60"
-            onClick={toggleCollapsed}
-            aria-label="Collapse sidebar"
-          >
-            <PanelLeftClose className="size-4" />
-          </Button>
         </SidebarHeader>
 
         <SidebarContent>
@@ -127,14 +89,14 @@ const Sidebar: FC = () => {
               isActive={isNavActive(pathname, '/settings')}
             />
           </SidebarMenu>
+          
+          <SidebarSecondaryMenu />
 
           <SidebarClubsSection
             clubs={clubs}
             isLoading={isGetClubsLoading}
             onCreateClub={() => setCreateClubOpen(true)}
           />
-
-          <SidebarSecondaryMenu />
         </SidebarContent>
 
         <SidebarFooter>

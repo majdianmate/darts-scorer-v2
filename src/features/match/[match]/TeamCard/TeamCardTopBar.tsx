@@ -9,6 +9,7 @@ import type { Match, Team } from '../../../../../types/match-types'
 
 import TeamTurnIndicator from '../../TeamCards/TeamTurnIndicator'
 import TeamCardLegIndicator from './TeamCardLegIndicator'
+import { teamCardIconBadgeStyle } from './team-card-utils'
 
 interface TeamCardTopBarProps {
   team: Team
@@ -34,13 +35,18 @@ const TeamCardTopBar: FC<TeamCardTopBarProps> = ({ team, isCurrentTeam }) => {
   const legsToWin = getLegsToWin(matchConfig)
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2.5">
       <div className="flex w-full items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
-            <TeamIcon className="size-4" style={{ color: team.color }} />
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg border"
+            style={teamCardIconBadgeStyle(team.color)}
+          >
+            <TeamIcon className="size-3.5" style={{ color: team.color }} />
           </div>
-          <span className="truncate text-sm font-semibold text-white/95">{team.name}</span>
+          <span className="truncate text-sm font-semibold tracking-tight text-white/90">
+            {team.name}
+          </span>
         </div>
 
         <div className="flex shrink-0 items-center">

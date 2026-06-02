@@ -7,12 +7,21 @@ import {
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '#/components/ui/button'
-import { cn } from '#/lib/utils.ts'
-import { Layers, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import type { Squad } from '../../../../types/club-types'
 import AvatarGroup from '#/components/AvatarGroup'
 import { setDialog, setTargetClubId } from '../../../../store/store'
 import ClubCardSquadList from './ClubCardSquadList'
+import {
+  clubCardSectionContentClass,
+  clubCardSectionEmptyFooterClass,
+  clubCardSectionIconClass,
+  clubCardSectionIconWrapClass,
+  clubCardSectionShellClass,
+  clubCardSectionStripeClass,
+  clubCardSectionTriggerClass,
+  getClubCardSectionTone,
+} from './club-card-section-styles'
 
 interface ClubCardSquadsProps {
   squads: Squad[]
@@ -20,6 +29,7 @@ interface ClubCardSquadsProps {
 }
 
 const ClubCardSquads: FC<ClubCardSquadsProps> = ({ squads, clubId }) => {
+  const tone = getClubCardSectionTone('squads')
   const sortedSquads = useMemo(
     () => [...squads].sort((a, b) => a.name.localeCompare(b.name)),
     [squads],
@@ -37,10 +47,14 @@ const ClubCardSquads: FC<ClubCardSquadsProps> = ({ squads, clubId }) => {
 
   if (squadCount === 0) {
     return (
-      <div className="overflow-hidden rounded-xl border border-border/70 bg-linear-to-b from-muted/30 to-background shadow-sm">
-        <div className="flex items-center gap-3 px-3 py-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/80 shadow-sm">
-            <Layers className="size-4 text-muted-foreground" />
+      <div className={clubCardSectionShellClass}>
+        <div className="relative flex items-center gap-3 bg-muted/40 px-3 py-3 pl-4">
+          <span
+            className={clubCardSectionStripeClass('squads')}
+            aria-hidden
+          />
+          <div className={clubCardSectionIconWrapClass('squads')}>
+            <tone.Icon className={clubCardSectionIconClass('squads')} />
           </div>
 
           <div className="min-w-0 text-left">
@@ -56,7 +70,7 @@ const ClubCardSquads: FC<ClubCardSquadsProps> = ({ squads, clubId }) => {
           </div>
         </div>
 
-        <div className="border-t border-border/50 px-3 py-3">
+        <div className={clubCardSectionEmptyFooterClass}>
           <p className="mb-3 text-center text-xs text-muted-foreground">
             Create squads to organize players for matches.
           </p>
@@ -80,17 +94,16 @@ const ClubCardSquads: FC<ClubCardSquadsProps> = ({ squads, clubId }) => {
   }
 
   return (
-    <Accordion className="overflow-hidden rounded-xl border border-border/70 bg-linear-to-b from-muted/30 to-background shadow-sm">
+    <Accordion className={clubCardSectionShellClass}>
       <AccordionItem value="squads" className="border-0">
-        <AccordionTrigger
-          className={cn(
-            'items-center gap-3 px-3 py-3 hover:no-underline',
-            '[&_[data-slot=accordion-trigger-icon]]:mt-0',
-          )}
-        >
+        <AccordionTrigger className={clubCardSectionTriggerClass}>
+          <span
+            className={clubCardSectionStripeClass('squads')}
+            aria-hidden
+          />
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/80 shadow-sm">
-              <Layers className="size-4 text-muted-foreground" />
+            <div className={clubCardSectionIconWrapClass('squads')}>
+              <tone.Icon className={clubCardSectionIconClass('squads')} />
             </div>
 
             <div className="min-w-0 text-left">
@@ -117,7 +130,7 @@ const ClubCardSquads: FC<ClubCardSquadsProps> = ({ squads, clubId }) => {
           )}
         </AccordionTrigger>
 
-        <AccordionContent className="px-3 pb-3">
+        <AccordionContent className={clubCardSectionContentClass}>
           <ClubCardSquadList squads={sortedSquads} />
         </AccordionContent>
       </AccordionItem>
