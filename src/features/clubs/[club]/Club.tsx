@@ -6,6 +6,7 @@ import {
   Mail,
   Plus,
   Settings,
+  Target,
   Users,
   UsersRound,
 } from 'lucide-react'
@@ -25,6 +26,7 @@ import {
 import ClubMembers from './ClubMembers'
 import ClubInvitations from './ClubInvitations'
 import ClubSquads from './ClubSquads'
+import ClubMatchList from './ClubMatchList'
 import ClubSettings from './ClubSettings'
 import { setDialog, setTargetClubId } from '../../../../store/store'
 
@@ -174,6 +176,10 @@ const Club = () => {
               </span>
             ) : null}
           </TabsTrigger>
+          <TabsTrigger value="matches" className="gap-1.5">
+            <Target className="size-3.5" />
+            Matches
+          </TabsTrigger>
           <TabsTrigger value="settings" className="gap-1.5">
             <Settings className="size-3.5" />
             Settings
@@ -192,6 +198,9 @@ const Club = () => {
             </TabsContent>
             <TabsContent value="squads">
               <ClubSquads squads={club.squads} clubId={club.id} />
+            </TabsContent>
+            <TabsContent value="matches">
+              <ClubMatchList clubId={club.id} />
             </TabsContent>
             <TabsContent value="settings">
               <ClubSettings club={club} />

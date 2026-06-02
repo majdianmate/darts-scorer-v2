@@ -24,8 +24,8 @@ interface ClubCardProps {
 }
 
 const ClubCard: FC<ClubCardProps> = ({ club }) => {
-  const navigate = useNavigate()
   const { deleteClub } = useClub(club.id)
+  const navigate = useNavigate()
 
   const goToClub = () => {
     navigate({ to: '/clubs/$club', params: { club: club.id } })
@@ -50,6 +50,11 @@ const ClubCard: FC<ClubCardProps> = ({ club }) => {
     setDialog('createSquad', true)
   }
 
+  const onStartMatch = () => {
+    setTargetClubId(club.id)
+    setDialog('matchConfig', true)
+  }
+
   return (
     <Card
       className="flex h-full cursor-pointer flex-col transition-colors hover:bg-muted/20"
@@ -71,20 +76,25 @@ const ClubCard: FC<ClubCardProps> = ({ club }) => {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-1 flex-col gap-2">
+      <CardContent
+        className="flex flex-1 flex-col gap-2"
+        onClick={stopCardNavigation}
+      >
         <ClubCardMembers members={club.members} />
-        <ClubCardInvitations
-          invitations={club.invitations}
-          clubId={club.id}
-        />
+        <ClubCardInvitations invitations={club.invitations} clubId={club.id} />
         <ClubCardSquads squads={club.squads} clubId={club.id} />
       </CardContent>
 
-      <CardFooter
-        className="mt-auto border-t border-border/60 bg-transparent p-4 pt-3"
-        onClick={stopCardNavigation}
-      >
-        <Button variant="default" className="w-full gap-2" type="button">
+      <CardFooter className="mt-auto border-t border-border/60 bg-transparent p-4 pt-3">
+        <Button
+          variant="default"
+          className="w-full gap-2"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onStartMatch()
+          }}
+        >
           <Target className="size-4" />
           Start match
         </Button>

@@ -39,7 +39,7 @@ function RouteComponent() {
         email: email.trim(),
         password,
       });
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/clubs" });
     } finally {
       setIsSubmitting(false);
     }
@@ -50,14 +50,14 @@ function RouteComponent() {
     setIsSubmitting(true);
     try {
       await loginWithGoogle();
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/clubs" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="mx-auto w-full max-w-sm">
+    <div className="mx-auto w-full max-w-sm p-4">
       <h2 className="text-balance text-center text-lg font-semibold text-foreground">
         Create your account
       </h2>

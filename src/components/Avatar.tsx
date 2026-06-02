@@ -15,7 +15,7 @@ const Avatar: FC<AvatarProps> = ({ name, image, size = "md", className = "" }) =
     xs: "h-5 w-5 text-[9px]",
     sm: "h-6 w-6 text-[10px]",
     md: "h-10 w-10 text-sm",
-    lg: "h-16 w-16 text-xl",
+    lg: "h-12 w-12 text-lg",
   };
 
   // Monogram generálása a fallbackhez

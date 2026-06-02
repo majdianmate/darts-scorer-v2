@@ -14,9 +14,13 @@ import { Route as protectedLayoutRouteImport } from './routes/(protected)/_layou
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as protectedLayoutTestRouteImport } from './routes/(protected)/_layout.test'
+import { Route as protectedLayoutMatchRouteImport } from './routes/(protected)/_layout.match'
 import { Route as protectedLayoutFriendsRouteImport } from './routes/(protected)/_layout.friends'
 import { Route as protectedLayoutClubsRouteImport } from './routes/(protected)/_layout.clubs'
+import { Route as protectedLayoutMatchIndexRouteImport } from './routes/(protected)/_layout.match.index'
 import { Route as protectedLayoutClubsIndexRouteImport } from './routes/(protected)/_layout.clubs.index'
+import { Route as protectedLayoutMatchMatchIdRouteImport } from './routes/(protected)/_layout.match.$matchId'
 import { Route as protectedLayoutClubsClubRouteImport } from './routes/(protected)/_layout.clubs.$club'
 
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +47,16 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const protectedLayoutTestRoute = protectedLayoutTestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => protectedLayoutRoute,
+} as any)
+const protectedLayoutMatchRoute = protectedLayoutMatchRouteImport.update({
+  id: '/match',
+  path: '/match',
+  getParentRoute: () => protectedLayoutRoute,
+} as any)
 const protectedLayoutFriendsRoute = protectedLayoutFriendsRouteImport.update({
   id: '/friends',
   path: '/friends',
@@ -53,11 +67,23 @@ const protectedLayoutClubsRoute = protectedLayoutClubsRouteImport.update({
   path: '/clubs',
   getParentRoute: () => protectedLayoutRoute,
 } as any)
+const protectedLayoutMatchIndexRoute =
+  protectedLayoutMatchIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => protectedLayoutMatchRoute,
+  } as any)
 const protectedLayoutClubsIndexRoute =
   protectedLayoutClubsIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => protectedLayoutClubsRoute,
+  } as any)
+const protectedLayoutMatchMatchIdRoute =
+  protectedLayoutMatchMatchIdRouteImport.update({
+    id: '/$matchId',
+    path: '/$matchId',
+    getParentRoute: () => protectedLayoutMatchRoute,
   } as any)
 const protectedLayoutClubsClubRoute =
   protectedLayoutClubsClubRouteImport.update({
@@ -73,8 +99,12 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof authSignUpRoute
   '/clubs': typeof protectedLayoutClubsRouteWithChildren
   '/friends': typeof protectedLayoutFriendsRoute
+  '/match': typeof protectedLayoutMatchRouteWithChildren
+  '/test': typeof protectedLayoutTestRoute
   '/clubs/$club': typeof protectedLayoutClubsClubRoute
+  '/match/$matchId': typeof protectedLayoutMatchMatchIdRoute
   '/clubs/': typeof protectedLayoutClubsIndexRoute
+  '/match/': typeof protectedLayoutMatchIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,8 +112,11 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/friends': typeof protectedLayoutFriendsRoute
+  '/test': typeof protectedLayoutTestRoute
   '/clubs/$club': typeof protectedLayoutClubsClubRoute
+  '/match/$matchId': typeof protectedLayoutMatchMatchIdRoute
   '/clubs': typeof protectedLayoutClubsIndexRoute
+  '/match': typeof protectedLayoutMatchIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,8 +127,12 @@ export interface FileRoutesById {
   '/(protected)/_layout': typeof protectedLayoutRouteWithChildren
   '/(protected)/_layout/clubs': typeof protectedLayoutClubsRouteWithChildren
   '/(protected)/_layout/friends': typeof protectedLayoutFriendsRoute
+  '/(protected)/_layout/match': typeof protectedLayoutMatchRouteWithChildren
+  '/(protected)/_layout/test': typeof protectedLayoutTestRoute
   '/(protected)/_layout/clubs/$club': typeof protectedLayoutClubsClubRoute
+  '/(protected)/_layout/match/$matchId': typeof protectedLayoutMatchMatchIdRoute
   '/(protected)/_layout/clubs/': typeof protectedLayoutClubsIndexRoute
+  '/(protected)/_layout/match/': typeof protectedLayoutMatchIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,8 +143,12 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/clubs'
     | '/friends'
+    | '/match'
+    | '/test'
     | '/clubs/$club'
+    | '/match/$matchId'
     | '/clubs/'
+    | '/match/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -115,8 +156,11 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/friends'
+    | '/test'
     | '/clubs/$club'
+    | '/match/$matchId'
     | '/clubs'
+    | '/match'
   id:
     | '__root__'
     | '/'
@@ -126,8 +170,12 @@ export interface FileRouteTypes {
     | '/(protected)/_layout'
     | '/(protected)/_layout/clubs'
     | '/(protected)/_layout/friends'
+    | '/(protected)/_layout/match'
+    | '/(protected)/_layout/test'
     | '/(protected)/_layout/clubs/$club'
+    | '/(protected)/_layout/match/$matchId'
     | '/(protected)/_layout/clubs/'
+    | '/(protected)/_layout/match/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -175,6 +223,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(protected)/_layout/test': {
+      id: '/(protected)/_layout/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof protectedLayoutTestRouteImport
+      parentRoute: typeof protectedLayoutRoute
+    }
+    '/(protected)/_layout/match': {
+      id: '/(protected)/_layout/match'
+      path: '/match'
+      fullPath: '/match'
+      preLoaderRoute: typeof protectedLayoutMatchRouteImport
+      parentRoute: typeof protectedLayoutRoute
+    }
     '/(protected)/_layout/friends': {
       id: '/(protected)/_layout/friends'
       path: '/friends'
@@ -189,12 +251,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof protectedLayoutClubsRouteImport
       parentRoute: typeof protectedLayoutRoute
     }
+    '/(protected)/_layout/match/': {
+      id: '/(protected)/_layout/match/'
+      path: '/'
+      fullPath: '/match/'
+      preLoaderRoute: typeof protectedLayoutMatchIndexRouteImport
+      parentRoute: typeof protectedLayoutMatchRoute
+    }
     '/(protected)/_layout/clubs/': {
       id: '/(protected)/_layout/clubs/'
       path: '/'
       fullPath: '/clubs/'
       preLoaderRoute: typeof protectedLayoutClubsIndexRouteImport
       parentRoute: typeof protectedLayoutClubsRoute
+    }
+    '/(protected)/_layout/match/$matchId': {
+      id: '/(protected)/_layout/match/$matchId'
+      path: '/$matchId'
+      fullPath: '/match/$matchId'
+      preLoaderRoute: typeof protectedLayoutMatchMatchIdRouteImport
+      parentRoute: typeof protectedLayoutMatchRoute
     }
     '/(protected)/_layout/clubs/$club': {
       id: '/(protected)/_layout/clubs/$club'
@@ -219,14 +295,31 @@ const protectedLayoutClubsRouteChildren: protectedLayoutClubsRouteChildren = {
 const protectedLayoutClubsRouteWithChildren =
   protectedLayoutClubsRoute._addFileChildren(protectedLayoutClubsRouteChildren)
 
+interface protectedLayoutMatchRouteChildren {
+  protectedLayoutMatchMatchIdRoute: typeof protectedLayoutMatchMatchIdRoute
+  protectedLayoutMatchIndexRoute: typeof protectedLayoutMatchIndexRoute
+}
+
+const protectedLayoutMatchRouteChildren: protectedLayoutMatchRouteChildren = {
+  protectedLayoutMatchMatchIdRoute: protectedLayoutMatchMatchIdRoute,
+  protectedLayoutMatchIndexRoute: protectedLayoutMatchIndexRoute,
+}
+
+const protectedLayoutMatchRouteWithChildren =
+  protectedLayoutMatchRoute._addFileChildren(protectedLayoutMatchRouteChildren)
+
 interface protectedLayoutRouteChildren {
   protectedLayoutClubsRoute: typeof protectedLayoutClubsRouteWithChildren
   protectedLayoutFriendsRoute: typeof protectedLayoutFriendsRoute
+  protectedLayoutMatchRoute: typeof protectedLayoutMatchRouteWithChildren
+  protectedLayoutTestRoute: typeof protectedLayoutTestRoute
 }
 
 const protectedLayoutRouteChildren: protectedLayoutRouteChildren = {
   protectedLayoutClubsRoute: protectedLayoutClubsRouteWithChildren,
   protectedLayoutFriendsRoute: protectedLayoutFriendsRoute,
+  protectedLayoutMatchRoute: protectedLayoutMatchRouteWithChildren,
+  protectedLayoutTestRoute: protectedLayoutTestRoute,
 }
 
 const protectedLayoutRouteWithChildren = protectedLayoutRoute._addFileChildren(

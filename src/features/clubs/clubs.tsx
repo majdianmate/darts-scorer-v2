@@ -10,6 +10,7 @@ import MemberManagerDialog from './MemberManager/MemberManagerDialog'
 import ClubEditor from './ClubEditor/ClubEditor'
 import SquadCreator from './SquadSystem/SquadCreator/SquadCreator'
 import SquadEditor from './SquadSystem/SquadEditor/SquadEditor'
+import MatchConfigDialog from '../match/MatchConfig/MatchConfigDialog'
 
 const Clubs = () => {
   const { user } = useUser()
@@ -89,6 +90,7 @@ const Clubs = () => {
       <ClubEditor />
       <SquadCreator />
       <SquadEditor />
+      <MatchConfigDialog />
     </div>
   )
 }
