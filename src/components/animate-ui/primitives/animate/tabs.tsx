@@ -10,6 +10,7 @@ import {
   type HighlightProps,
 } from '#/components/animate-ui/primitives/effects/highlight.tsx';
 import { getStrictContext } from '#/lib/get-strict-context.tsx';
+import { cn } from '#/lib/utils.ts';
 import { Slot, type WithAsChild } from '#/components/animate-ui/primitives/animate/slot.tsx';
 
 type TabsContextType = {
@@ -184,10 +185,13 @@ function TabsTrigger({
 type TabsContentsProps = HTMLMotionProps<'div'> & {
   children: React.ReactNode;
   transition?: Transition;
+  /** Size to the parent height so tab panels can use h-full (default: content height). */
+  fill?: boolean;
 };
 
 function TabsContents({
   children,
+  fill = false,
   transition = {
     type: 'spring',
     stiffness: 300,
@@ -195,6 +199,7 @@ function TabsContents({
     bounce: 0,
     restDelta: 0.01,
   },
+  className,
   ...props
 }: TabsContentsProps) {
   const { activeValue } = useTabs();
@@ -266,16 +271,45 @@ function TabsContents({
   }, [activeIndex, childrenArray.length, measure]);
 
   React.useLayoutEffect(() => {
-    if (height === 0 && activeIndex >= 0) {
-      const next = measure(activeIndex);
-      if (next !== 0) setHeight(next);
-    }
-  }, [activeIndex, height, measure]);
+    if (fill || height === 0 || activeIndex < 0) return
+    const next = measure(activeIndex);
+    if (next !== 0) setHeight(next);
+  }, [activeIndex, fill, height, measure]);
+
+  if (fill) {
+    return (
+      <motion.div
+        ref={containerRef}
+        data-slot="tabs-contents"
+        className={cn('flex min-h-0 flex-1 flex-col overflow-hidden', className)}
+        {...props}
+      >
+        <motion.div
+          className="flex h-full min-h-0 -mx-2"
+          animate={{ x: activeIndex * -100 + '%' }}
+          transition={transition}
+        >
+          {childrenArray.map((child, index) => (
+            <div
+              key={index}
+              ref={(el) => {
+                itemRefs.current[index] = el;
+              }}
+              className="h-full min-h-0 w-full shrink-0 px-2"
+            >
+              {child}
+            </div>
+          ))}
+        </motion.div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
       ref={containerRef}
       data-slot="tabs-contents"
+      className={className}
       style={{ overflow: 'hidden' }}
       animate={{ height }}
       transition={transition}
@@ -292,7 +326,7 @@ function TabsContents({
             ref={(el) => {
               itemRefs.current[index] = el;
             }}
-            className="w-full shrink-0 px-2 h-full"
+            className="h-full w-full shrink-0 px-2"
           >
             {child}
           </div>

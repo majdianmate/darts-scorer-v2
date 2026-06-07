@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { useEffect, useRef, useState, type FC } from "react";
 import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
@@ -9,7 +9,7 @@ import { addTeam } from "../../../../../../store/match-store";
 import type { ClubMember } from "../../../../../../types/club-types";
 import TeamCreatorBase from "./TeamCreatorBase";
 import TeamCreatorMemberPicker from "./TeamCreatorMemberPicker";
-import { membersToTeam } from "./members-to-team";
+import { membersToDefaultTeamName, membersToTeam } from "./members-to-team";
 
 interface TeamManagerCreateProps {
   clubId: string;
@@ -21,8 +21,29 @@ const TeamManagerCreate: FC<TeamManagerCreateProps> = ({ clubId }) => {
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [icon, setIcon] = useState<SquadIconKey>(DEFAULT_SQUAD_ICON);
   const [selectedMembers, setSelectedMembers] = useState<ClubMember[]>([]);
+  const nameIsManualRef = useRef(false);
+  const lastAutoNameRef = useRef("");
+
+  useEffect(() => {
+    if (nameIsManualRef.current) return;
+
+    const autoName = membersToDefaultTeamName(selectedMembers);
+    lastAutoNameRef.current = autoName;
+    setName(autoName);
+  }, [selectedMembers]);
+
+  const handleNameChange = (value: string) => {
+    if (value !== lastAutoNameRef.current) {
+      nameIsManualRef.current = true;
+    } else if (!value.trim()) {
+      nameIsManualRef.current = false;
+    }
+    setName(value);
+  };
 
   const resetForm = () => {
+    nameIsManualRef.current = false;
+    lastAutoNameRef.current = "";
     setName("");
     setColor(DEFAULT_COLOR);
     setIcon(DEFAULT_SQUAD_ICON);
@@ -65,7 +86,7 @@ const TeamManagerCreate: FC<TeamManagerCreateProps> = ({ clubId }) => {
         name={name}
         color={color}
         icon={icon}
-        onNameChange={setName}
+        onNameChange={handleNameChange}
         onColorChange={setColor}
         onIconChange={setIcon}
       />

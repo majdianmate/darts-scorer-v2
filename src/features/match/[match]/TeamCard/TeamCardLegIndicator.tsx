@@ -26,7 +26,7 @@ const TeamCardLegIndicator: FC<TeamCardLegIndicatorProps> = ({
             className="h-1 min-w-0 w-10 overflow-hidden rounded-full transition-all duration-300"
             style={{
               backgroundColor: 'rgba(255,255,255,0.08)',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.2) inset',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
             }}
           >
             <div

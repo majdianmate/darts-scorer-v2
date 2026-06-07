@@ -11,10 +11,19 @@ import { resolvePageTitle } from './resolve-page-title'
 
 const AppPageHeader: FC = () => {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const { collapsed, toggleCollapsed, pageTitleOverride, pageHeaderToolbar } =
-    useSidebarLayout()
+  const {
+    collapsed,
+    toggleCollapsed,
+    pageTitleOverride,
+    pageHeaderToolbar,
+    registerPageHeaderCenterEl,
+  } = useSidebarLayout()
 
   const title = pageTitleOverride ?? resolvePageTitle(pathname)
+  const isLiveMatchPage =
+    pathname.startsWith('/match/') &&
+    pathname !== '/match/' &&
+    pathname.length > '/match/'.length
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
@@ -33,14 +42,25 @@ const AppPageHeader: FC = () => {
         className="h-4 shrink-0 !self-center"
       />
 
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <h1 className="shrink-0 text-sm font-medium text-foreground">{title}</h1>
-        {pageHeaderToolbar ? (
-          <div className="flex min-w-0 flex-1 items-center gap-3">
+      <h1 className="max-w-[10rem] shrink-0 truncate text-sm font-medium text-foreground sm:max-w-[14rem]">
+        {title}
+      </h1>
+
+      {isLiveMatchPage ? (
+        <>
+          <div
+            ref={registerPageHeaderCenterEl}
+            className="flex min-w-0 flex-1 justify-center px-2"
+          />
+          <div className="flex shrink-0 items-center gap-2">
             {pageHeaderToolbar}
           </div>
-        ) : null}
-      </div>
+        </>
+      ) : (
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          {pageHeaderToolbar}
+        </div>
+      )}
     </header>
   )
 }

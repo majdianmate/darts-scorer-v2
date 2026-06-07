@@ -4,7 +4,10 @@ import { BarChart3, History, Users } from 'lucide-react'
 
 import { cn } from '#/lib/utils'
 
-import type { TeamLocal, TeamStatistics } from '../../../../../types/match-types'
+import type {
+  TeamLocal,
+  TeamStatistics,
+} from '../../../../../types/match-types'
 
 import TeamCardPlayerStats from './TeamCardPlayerStats'
 import TeamCardScoreHistory from './TeamCardScoreHistory'
@@ -26,21 +29,24 @@ const STATS_TABS: { id: StatsTab; label: string; icon: typeof BarChart3 }[] = [
 interface TeamCardStatsProps {
   team: TeamLocal
   accent: string
+  isCurrentTeam: boolean
 }
 
-const StatCell: FC<{ label: string; value: string; accent: string }> = ({
+const StatCell: FC<{ label: string; value: string; accent: string; isCurrentTeam: boolean }> = ({
   label,
   value,
   accent,
+  isCurrentTeam,
 }) => (
   <div
-    className="rounded-xl border px-2 py-2 text-center"
-    style={teamCardStatCellStyle(accent)}
+    className="rounded-xl border px-2 py-2 text-center" style={{
+      backgroundColor: isCurrentTeam ? accent : 'rgba(255,255,255,0.03)',
+    }}
   >
-    <p className="text-[8px] font-medium uppercase tracking-wider text-white/30">
+    <p className="text-[8px] font-medium uppercase tracking-wider text-white/80">
       {label}
     </p>
-    <p className="mt-1 text-base font-bold tabular-nums leading-none text-white/88">
+    <p className="mt-1 text-base font-bold tabular-nums leading-none text-white">
       {value}
     </p>
   </div>
@@ -51,32 +57,64 @@ function getPreviousLegAverage(stats: TeamStatistics) {
   return stats.legAverages[stats.legAverages.length - 1]!
 }
 
-const GameStatsPanel: FC<{ stats: TeamStatistics; accent: string }> = ({
+const GameStatsPanel: FC<{ stats: TeamStatistics; accent: string; isCurrentTeam: boolean }> = ({
   stats,
   accent,
+  isCurrentTeam,
 }) => {
   const prevLeg = getPreviousLegAverage(stats)
 
   return (
-    <div className="flex w-full flex-col gap-2 pt-1">
+    <div className="flex w-full flex-col gap-2 pt-1 h-full px-20 mt-5">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <StatCell label="Leg avg" value={stats.legAverage.toFixed(1)} accent={accent} />
-        <StatCell label="Prev leg" value={prevLeg.toFixed(1)} accent={accent} />
-        <StatCell label="Game avg" value={stats.gameAverage.toFixed(1)} accent={accent} />
+        <StatCell
+          label="Leg avg"
+          value={stats.legAverage.toFixed(1)}
+          accent={accent}
+          isCurrentTeam={isCurrentTeam}
+        />
+        <StatCell label="Prev leg" value={prevLeg.toFixed(1)} accent={accent} isCurrentTeam={isCurrentTeam} />
+        <StatCell
+          label="Game avg"
+          value={stats.gameAverage.toFixed(1)}
+          accent={accent}
+          isCurrentTeam={isCurrentTeam}
+        />
         <StatCell
           label="1st 9 avg"
           value={stats.firstNineDartsAverage.toFixed(1)}
           accent={accent}
+          isCurrentTeam={isCurrentTeam}
         />
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <StatCell label="Best CO" value={String(stats.bestCheckout)} accent={accent} />
-        <StatCell label="CO rate" value={`${stats.checkoutRate}%`} accent={accent} />
+        <StatCell
+          label="Best CO"
+          value={String(stats.bestCheckout)}
+          accent={accent}
+          isCurrentTeam={isCurrentTeam}
+        />
+        <StatCell
+          label="CO rate"
+          value={`${stats.checkoutRate}%`}
+          accent={accent}
+          isCurrentTeam={isCurrentTeam}
+        />
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <StatCell label="60+" value={String(stats.sixtyPlus)} accent={accent} />
-        <StatCell label="120+" value={String(stats.hundredTwentyPlus)} accent={accent} />
-        <StatCell label="180+" value={String(stats.hundredEightyPlus)} accent={accent} />
+        <StatCell label="60+" value={String(stats.sixtyPlus)} accent={accent} isCurrentTeam={isCurrentTeam} />
+        <StatCell
+          label="120+"
+          value={String(stats.hundredTwentyPlus)}
+          accent={accent}
+          isCurrentTeam={isCurrentTeam}
+        />
+        <StatCell
+          label="180+"
+          value={String(stats.hundredEightyPlus)}
+          accent={accent}
+          isCurrentTeam={isCurrentTeam}
+        />
       </div>
     </div>
   )
@@ -127,7 +165,7 @@ const StatsMenubar: FC<{
   </div>
 )
 
-const TeamCardStats: FC<TeamCardStatsProps> = ({ team, accent }) => {
+const TeamCardStats: FC<TeamCardStatsProps> = ({ team, accent, isCurrentTeam }) => {
   const [statsTab, setStatsTab] = useState<StatsTab>('game')
 
   return (
@@ -137,7 +175,7 @@ const TeamCardStats: FC<TeamCardStatsProps> = ({ team, accent }) => {
     >
       <div className={cn(teamCardStatsScrollClass, 'pb-2')}>
         {statsTab === 'game' && (
-          <GameStatsPanel stats={team.statistics} accent={accent} />
+          <GameStatsPanel stats={team.statistics} accent={accent} isCurrentTeam={isCurrentTeam} />
         )}
         {statsTab === 'players' &&
           (team.members.length > 0 ? (
@@ -150,7 +188,13 @@ const TeamCardStats: FC<TeamCardStatsProps> = ({ team, accent }) => {
         )}
       </div>
 
-      <StatsMenubar active={statsTab} onChange={setStatsTab} accent={accent} />
+      <div className="absolute bottom-2 left-2 right-2">
+        <StatsMenubar
+          active={statsTab}
+          onChange={setStatsTab}
+          accent={accent}
+        />
+      </div>
     </div>
   )
 }

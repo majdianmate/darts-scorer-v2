@@ -33,7 +33,10 @@ const TeamCreatorMemberPicker: FC<TeamCreatorMemberPickerProps> = ({
 
   return (
     <div className={cn("flex min-h-0 flex-col gap-2", className)}>
-      <p className="text-xs text-muted-foreground">Pick players for this team.</p>
+      <p className="text-xs text-muted-foreground">
+        Pick players for this team. The name above fills in automatically as their names joined
+        with <span className="font-medium text-foreground">&</span> (e.g. Anna & Béla).
+      </p>
 
       {members.length === 0 ? (
         <div className="flex items-center justify-center rounded-lg border border-dashed border-border/60 px-3 py-8 text-center text-xs text-muted-foreground">

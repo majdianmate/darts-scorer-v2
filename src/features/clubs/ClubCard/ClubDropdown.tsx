@@ -1,8 +1,10 @@
 import { type FC } from 'react'
+import { cn } from '#/lib/utils'
 import type { Club } from '../../../../types/club-types'
 import type { DropdownOption } from '#/components/Dropdown/DropdownComponent'
 import { MoreVertical, Pencil, Trash2, UserCog, Users } from 'lucide-react'
 import DropdownComponent from '#/components/Dropdown/DropdownComponent'
+import { dropdownTriggerButtonClass } from '#/components/Dropdown/dropdown-trigger-styles'
 import { useUser } from '../../../../hooks/use-user'
 
 interface ClubDropdownProps {
@@ -55,7 +57,7 @@ const ClubDropdown: FC<ClubDropdownProps> = ({
       trigger={
         <button
           type="button"
-          className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className={cn(dropdownTriggerButtonClass, 'size-8 rounded-lg')}
           aria-label={`Club actions for ${club.name}`}
         >
           <MoreVertical className="size-4" />

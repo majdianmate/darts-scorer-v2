@@ -49,10 +49,6 @@ export function isValidCheckoutAttempts(
   return checkoutAttempts >= 0 && checkoutAttempts <= dartsThrown
 }
 
-export function isValidCheckoutRemaining(remaining: number) {
-  return remaining % 2 === 0
-}
-
 export function maxScoreForDarts(dartsThrown: number) {
   return dartsThrown * 60
 }
@@ -96,18 +92,38 @@ export function isInCheckoutZone(remaining: number) {
   return remaining <= 179
 }
 
+export type CheckoutFlowStep = 'darts' | 'checkout'
+
+/** Ordered checkout prompts for the score-input dialog. */
+export function resolveCheckoutFlowSteps(
+  parsed: ParsedScore,
+  remainingBefore: number,
+): CheckoutFlowStep[] {
+  if (parsed.isAdvanced) return []
+
+  const remainingAfter = resolveRemainingAfter(parsed, remainingBefore)
+  if (remainingAfter === null) return []
+
+  const completesCheckout = remainingAfter === 0
+  const steps: CheckoutFlowStep[] = []
+
+  if (completesCheckout) {
+    steps.push('darts')
+  }
+
+  if (isInCheckoutZone(remainingBefore)) {
+    steps.push('checkout')
+  }
+
+  return steps
+}
+
+/** @deprecated Use resolveCheckoutFlowSteps().length > 0 */
 export function needsCheckoutPrompt(
   parsed: ParsedScore,
   remainingBefore: number,
 ) {
-  if (parsed.isAdvanced) return false
-
-  const remainingAfter = resolveRemainingAfter(parsed, remainingBefore)
-  if (remainingAfter === null) return false
-
-  return (
-    isInCheckoutZone(remainingBefore) && isInCheckoutZone(remainingAfter)
-  )
+  return resolveCheckoutFlowSteps(parsed, remainingBefore).length > 0
 }
 
 export function applyCheckoutDetails(
@@ -217,18 +233,6 @@ export const scoreValidators: ScoreValidator[] = [
 
       if (!isInCheckoutZone(remainingScore)) {
         return 'Checkout attempts must be 0 when not in checkout zone.'
-      }
-    },
-  },
-  {
-    id: 'checkout-even',
-    skipWhenForce: true,
-    validate: ({ parsed, remainingScore }) => {
-      if (remainingScore === undefined) return
-      if (!isCheckoutSituation(parsed, remainingScore)) return
-
-      if (!isValidCheckoutRemaining(remainingScore)) {
-        return 'Checkout remaining must be an even number.'
       }
     },
   },

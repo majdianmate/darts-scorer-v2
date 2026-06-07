@@ -2,6 +2,14 @@ import { Timestamp } from "firebase/firestore";
 import type { ClubMember } from "../../../../../../types/club-types";
 import type { Team } from "../../../../../../types/match-types";
 
+/** Default local team name: member display names joined with " & ". */
+export function membersToDefaultTeamName(members: ClubMember[]): string {
+  return members
+    .map((member) => member.user.name.trim())
+    .filter(Boolean)
+    .join(" & ");
+}
+
 export function membersToTeam(
   name: string,
   color: string,

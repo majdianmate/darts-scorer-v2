@@ -3,6 +3,7 @@ import type { Squad } from '../../../../types/club-types'
 import type { DropdownOption } from '#/components/Dropdown/DropdownComponent'
 import { MoreVertical, Pencil, Trash } from 'lucide-react'
 import DropdownComponent from '#/components/Dropdown/DropdownComponent'
+import { dropdownTriggerButtonClass } from '#/components/Dropdown/dropdown-trigger-styles'
 
 interface SquadDropdownProps {
   squad: Squad
@@ -31,7 +32,7 @@ const SquadDropdown: FC<SquadDropdownProps> = ({ squad, onEdit, onDelete }) => {
       trigger={
         <button
           type="button"
-          className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:bg-muted hover:text-foreground data-[popup-open]:opacity-100"
+          className={dropdownTriggerButtonClass}
           aria-label={`Actions for squad ${squad.name}`}
         >
           <MoreVertical className="size-4" />

@@ -77,21 +77,17 @@ describe('StatsManager', () => {
     expect(snapshot.gameAverage).toBe(75)
   })
 
-  it('stores per-leg first nine averages for match-wide computation', () => {
+  it('keeps first nine across legs until three match visits are recorded', () => {
     const manager = new StatsManager()
 
     manager.processNewScore(makeScore({ score: 60, dartsThrown: 3 }))
     manager.processNewScore(makeScore({ score: 60, dartsThrown: 3 }))
-    manager.processNewScore(makeScore({ score: 60, dartsThrown: 3 }))
     manager.handleLegEnd()
 
     manager.processNewScore(makeScore({ score: 90, dartsThrown: 3 }))
-    manager.processNewScore(makeScore({ score: 90, dartsThrown: 3 }))
-    manager.processNewScore(makeScore({ score: 90, dartsThrown: 3 }))
-    manager.handleLegEnd()
 
-    expect(manager.firstNineLegAverages).toEqual([60, 90])
-    expect(computeMatchFirstNineDartsAverage(manager)).toBe(75)
+    expect(computeMatchFirstNineDartsAverage(manager)).toBe(70)
+    expect(manager.getSnapshot().firstNineDartsAverage).toBe(70)
   })
 })
 
@@ -107,8 +103,7 @@ describe('FirstNineTracker', () => {
     tracker.update(makeScore({ score: 180, dartsThrown: 3 }))
     expect(tracker.getValue()).toBe(57)
 
-    tracker.nextLeg()
     tracker.update(makeScore({ score: 100, dartsThrown: 2 }))
-    expect(tracker.getValue()).toBe(150)
+    expect(tracker.getValue()).toBe(57)
   })
 })

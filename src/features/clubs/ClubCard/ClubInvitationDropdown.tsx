@@ -8,6 +8,7 @@ import { useUser } from '../../../../hooks/use-user'
 import type { DropdownOption } from '#/components/Dropdown/DropdownComponent'
 import { MailX, MoreVertical } from 'lucide-react'
 import DropdownComponent from '#/components/Dropdown/DropdownComponent'
+import { dropdownTriggerButtonClass } from '#/components/Dropdown/dropdown-trigger-styles'
 import { useClub } from '../../../../hooks/use-club'
 
 interface ClubInvitationDropdownProps {
@@ -47,7 +48,7 @@ const ClubInvitationDropdown: FC<ClubInvitationDropdownProps> = ({
       trigger={
         <button
           type="button"
-          className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:bg-muted hover:text-foreground data-[popup-open]:opacity-100"
+          className={dropdownTriggerButtonClass}
           aria-label={`Invitation actions for ${member.user.name}`}
         >
           <MoreVertical className="size-4" />

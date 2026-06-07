@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { useSelector } from '@tanstack/react-store'
-import { ChartArea, Loader2, Settings, Undo2 } from 'lucide-react'
+import { Loader2, Undo2 } from 'lucide-react'
+import PageHeaderCenter from '#/components/Sidebar/PageHeaderCenter'
+import PageHeaderToolbar from '#/components/Sidebar/PageHeaderToolbar'
 import { Route } from '@/routes/(protected)/_layout.match.$matchId'
 import { Button } from '#/components/ui/button'
-import { cn } from '#/lib/utils'
 import { isMatchEnded } from '#/utils/match-leg-utils'
 import { useMatch, useMatchSubscription } from '../../../../hooks/use-match'
 import { useUser } from '../../../../hooks/use-user'
@@ -35,6 +36,7 @@ const Match = () => {
   const { club } = useClub(match?.clubId ?? '')
   const storeMatch = useSelector(matchStore, (state) => state.match)
   const teams = useSelector(matchStore, (state) => state.teams)
+  const [activeTab, setActiveTab] = useState('match')
   const [isUndoing, setIsUndoing] = useState(false)
   const [winDialogDismissed, setWinDialogDismissed] = useState(false)
   const canUndo = useSelector(matchStore, () => canUndoLastScore())
@@ -51,6 +53,7 @@ const Match = () => {
 
   useEffect(() => {
     setWinDialogDismissed(false)
+    setActiveTab('match')
   }, [matchId])
 
   useEffect(() => {
@@ -85,11 +88,7 @@ const Match = () => {
   }
 
   return (
-    <div
-      className={cn(
-        'relative mx-auto flex h-full w-full flex-col gap-2',
-      )}
-    >
+    <div className="mx-auto flex h-full min-h-0 w-full flex-col">
       <MatchWinDialog
         open={matchEnded && !!winnerTeam && !winDialogDismissed}
         match={storeMatch}
@@ -97,28 +96,39 @@ const Match = () => {
         onClose={() => setWinDialogDismissed(true)}
       />
 
-      <div className="absolute flex gap-2 self-end">
-        <Button
-          variant="outline"
-          disabled={!canUndo || isUndoing || matchEnded}
-          onClick={() => {
-            setIsUndoing(true)
-            void undoLastScore().finally(() => setIsUndoing(false))
-          }}
-        >
-          <Undo2 className="size-4" />
-          Undo last score
-        </Button>
-      </div>
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="flex min-h-0 flex-1 flex-col"
+      >
+        <PageHeaderCenter>
+          <TabsList className="shrink-0">
+            <TabsTrigger value="match">Match</TabsTrigger>
+            <TabsTrigger value="statistics">Statistics</TabsTrigger>
+          </TabsList>
+        </PageHeaderCenter>
 
-      <Tabs>
-        <TabsList defaultValue="match" className="self-center">
-          <TabsTrigger value="match">Match</TabsTrigger>
-          <TabsTrigger value="statistics">Statistics</TabsTrigger>
-        </TabsList>
-        <TabsContents>
-          <TabsContent value="match">
-            <div className="flex h-full min-h-0 w-full justify-center gap-4">
+        <PageHeaderToolbar>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!canUndo || isUndoing || matchEnded}
+            onClick={() => {
+              setIsUndoing(true)
+              void undoLastScore().finally(() => setIsUndoing(false))
+            }}
+          >
+            <Undo2 className="size-4" />
+            Undo last score
+          </Button>
+        </PageHeaderToolbar>
+
+        <TabsContents fill className="min-h-0 flex-1">
+          <TabsContent
+            value="match"
+            className="flex h-full min-h-0 flex-col gap-2"
+          >
+            <div className="flex min-h-0 flex-1 justify-center gap-4">
               {teams.map((team) => (
                 <TeamCard key={team.id} team={team} />
               ))}
@@ -126,7 +136,7 @@ const Match = () => {
             <ScoreInput disabled={matchEnded} />
             <ScoreDisplay />
           </TabsContent>
-          <TabsContent value="statistics">
+          <TabsContent value="statistics" className="h-full min-h-0">
             <MatchStatistics match={storeMatch} />
           </TabsContent>
         </TabsContents>

@@ -41,19 +41,19 @@ export class LegAverageTracker extends ThreeDartAverageTracker {
   }
 }
 
-/** First 3 visits of each leg (first 9 darts when 3 darts per visit). */
+/** First 3 visits of the match (first 9 darts when 3 darts per visit). */
 export class FirstNineTracker implements IStatTracker {
   private points = 0
   private darts = 0
-  private visitsInLeg = 0
+  private visits = 0
   private currentAverage = 0
 
   public update(score: Score): number {
-    if (this.visitsInLeg >= 3) return this.currentAverage
+    if (this.visits >= 3) return this.currentAverage
 
     this.points += score.score
     this.darts += resolveDartsThrownForScore(score)
-    this.visitsInLeg++
+    this.visits++
     this.currentAverage = computeThreeDartAverage(this.points, this.darts)
     return this.currentAverage
   }
@@ -63,14 +63,7 @@ export class FirstNineTracker implements IStatTracker {
   }
 
   public hasVisitsInCurrentLeg() {
-    return this.visitsInLeg > 0
-  }
-
-  public nextLeg() {
-    this.points = 0
-    this.darts = 0
-    this.visitsInLeg = 0
-    this.currentAverage = 0
+    return this.visits > 0
   }
 }
 
@@ -82,7 +75,7 @@ export class CheckoutRateTracker implements IStatTracker {
   public update(score: Score): number {
     if (!score.isCheckoutAttempt) return this.currentRate
 
-    this.attempts++
+    this.attempts += score.checkoutAttempts ?? 0
     if (score.isCheckedOut) this.checkouts++
 
     this.currentRate = parseFloat(((this.checkouts / this.attempts) * 100).toFixed(2))
@@ -128,8 +121,6 @@ export class StatsManager {
 
   public bestCheckout = 0
   public legAverages: number[] = []
-  /** Per-leg firstNineDartsAverage values (first 3 visits each leg). */
-  public firstNineLegAverages: number[] = []
 
   public processNewScore(score: Score): Statistic {
     const stats: Statistic = {
@@ -154,11 +145,7 @@ export class StatsManager {
 
   public handleLegEnd() {
     this.legAverages.push(this.legAvg.getValue() as number)
-    if (this.firstNine.hasVisitsInCurrentLeg()) {
-      this.firstNineLegAverages.push(this.firstNine.getValue() as number)
-    }
     this.legAvg.reset()
-    this.firstNine.nextLeg()
   }
 
   public getSnapshot(): Statistic {
@@ -176,18 +163,10 @@ export class StatsManager {
   }
 }
 
-/** Match-wide mean of per-leg firstNineDartsAverage (same tracker rules as live stats). */
+/** Match-wide first 9 darts average (first 3 visits of the match). */
 export function computeMatchFirstNineDartsAverage(
   manager: StatsManager,
 ): number {
-  const legValues = [...manager.firstNineLegAverages]
-  if (manager.firstNine.hasVisitsInCurrentLeg()) {
-    legValues.push(manager.firstNine.getValue() as number)
-  }
-  if (legValues.length === 0) return 0
-  return parseFloat(
-    (legValues.reduce((sum, value) => sum + value, 0) / legValues.length).toFixed(
-      2,
-    ),
-  )
+  if (!manager.firstNine.hasVisitsInCurrentLeg()) return 0
+  return manager.firstNine.getValue() as number
 }

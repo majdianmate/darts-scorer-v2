@@ -17,6 +17,8 @@ type SidebarLayoutContextValue = {
   setPageTitleOverride: (title: string | null) => void
   pageHeaderToolbar: ReactNode | null
   setPageHeaderToolbar: (toolbar: ReactNode | null) => void
+  pageHeaderCenterEl: HTMLDivElement | null
+  registerPageHeaderCenterEl: (element: HTMLDivElement | null) => void
 }
 
 const SidebarLayoutContext = createContext<SidebarLayoutContextValue | null>(
@@ -30,6 +32,15 @@ export function SidebarLayoutProvider({ children }: { children: ReactNode }) {
   )
   const [pageHeaderToolbar, setPageHeaderToolbar] = useState<ReactNode | null>(
     null,
+  )
+  const [pageHeaderCenterEl, setPageHeaderCenterEl] =
+    useState<HTMLDivElement | null>(null)
+
+  const registerPageHeaderCenterEl = useCallback(
+    (element: HTMLDivElement | null) => {
+      setPageHeaderCenterEl(element)
+    },
+    [],
   )
 
   useEffect(() => {
@@ -52,8 +63,17 @@ export function SidebarLayoutProvider({ children }: { children: ReactNode }) {
       setPageTitleOverride,
       pageHeaderToolbar,
       setPageHeaderToolbar,
+      pageHeaderCenterEl,
+      registerPageHeaderCenterEl,
     }),
-    [collapsed, toggleCollapsed, pageTitleOverride, pageHeaderToolbar],
+    [
+      collapsed,
+      toggleCollapsed,
+      pageTitleOverride,
+      pageHeaderToolbar,
+      pageHeaderCenterEl,
+      registerPageHeaderCenterEl,
+    ],
   )
 
   return (

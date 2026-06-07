@@ -46,7 +46,7 @@ export const clubCardSectionEmptyFooterClass =
   'border-t border-border/50 bg-muted/20 px-3 py-3'
 
 export const clubCardSectionTriggerClass = cn(
-  'relative items-center gap-3 rounded-none border-0 px-3 py-3 pl-4',
+  'group relative items-center gap-3 rounded-none border-0 px-3 py-3 pl-4',
   'bg-muted/40 hover:bg-muted/55 hover:no-underline',
   'group-aria-expanded/accordion-trigger:bg-background',
   'group-aria-expanded/accordion-trigger:shadow-[inset_0_-1px_0_0_var(--border)]',

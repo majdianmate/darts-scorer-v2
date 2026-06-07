@@ -113,7 +113,7 @@ const FriendCard = ({
             </span>
 
             {!isRemoving && (
-              <FriendDropdown friendship={friendship} onRemove={onRemove} />
+              <FriendDropdown friendship={friendship} friend={friend} onRemove={onRemove} />
             )}
           </div>
 

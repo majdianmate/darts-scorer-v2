@@ -42,7 +42,7 @@ const TeamCardTopBar: FC<TeamCardTopBarProps> = ({ team, isCurrentTeam }) => {
             className="flex size-8 shrink-0 items-center justify-center rounded-lg border"
             style={teamCardIconBadgeStyle(team.color)}
           >
-            <TeamIcon className="size-3.5" style={{ color: team.color }} />
+            <TeamIcon className="size-3.5 text-foreground"  />
           </div>
           <span className="truncate text-sm font-semibold tracking-tight text-white/90">
             {team.name}

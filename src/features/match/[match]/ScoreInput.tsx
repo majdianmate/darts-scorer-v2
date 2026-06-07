@@ -10,8 +10,9 @@ import { Input } from '#/components/ui/input'
 import { Kbd } from '#/components/ui/kbd'
 import { cn } from '#/lib/utils'
 import {
-  needsCheckoutPrompt,
   parseScoreStructure,
+  resolveCheckoutFlowSteps,
+  type CheckoutFlowStep,
 } from '#/utils/score-parser'
 import { toast } from 'sonner'
 import {
@@ -102,11 +103,18 @@ const ScoreInput: FC<{ disabled?: boolean }> = ({ disabled = false }) => {
   const [value, setValue] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [checkoutSteps, setCheckoutSteps] = useState<CheckoutFlowStep[]>([])
   const [pendingCommand, setPendingCommand] = useState<string | null>(null)
+  const [pendingScorer, setPendingScorer] = useState<{
+    teamId: string
+    playerId: string
+  } | null>(null)
 
   const cancelCheckout = useCallback(() => {
     setCheckoutOpen(false)
+    setCheckoutSteps([])
     setPendingCommand(null)
+    setPendingScorer(null)
   }, [])
 
   const close = useCallback(() => {
@@ -114,7 +122,9 @@ const ScoreInput: FC<{ disabled?: boolean }> = ({ disabled = false }) => {
     setPrefix('')
     setValue('')
     setCheckoutOpen(false)
+    setCheckoutSteps([])
     setPendingCommand(null)
+    setPendingScorer(null)
   }, [])
 
   const openWith = useCallback((initial: { prefix: string; value: string }) => {
@@ -126,6 +136,7 @@ const ScoreInput: FC<{ disabled?: boolean }> = ({ disabled = false }) => {
   const submitScore = useCallback(
     async (
       command: string,
+      scorer: { teamId: string; playerId: string },
       checkoutDetails?: { dartsThrown: number; checkoutAttempts: number },
     ) => {
       setIsSubmitting(true)
@@ -133,6 +144,7 @@ const ScoreInput: FC<{ disabled?: boolean }> = ({ disabled = false }) => {
         const ok = await addScore(
           command,
           checkoutDetails ? { checkoutDetails } : undefined,
+          scorer,
         )
         if (ok) close()
       } finally {
@@ -144,23 +156,34 @@ const ScoreInput: FC<{ disabled?: boolean }> = ({ disabled = false }) => {
 
   const trySubmit = useCallback(
     (command: string) => {
-      const currentTeamId = matchStore.get().match?.currentTeamId
-      if (!currentTeamId) return
+      const state = matchStore.get()
+      const teamId = state.match?.currentTeamId
+      if (!teamId) return
 
-      const parsed = parseScoreStructure(command)
+      const team = state.teams.find((entry) => entry.id === teamId)
+      const playerId = team?.currentPlayerId
+      if (!playerId) return
+
+      const scorer = { teamId, playerId }
+      const normalizedCommand = command.trim() || '0'
+
+      const parsed = parseScoreStructure(normalizedCommand)
       if (!parsed.isValid) {
         toast.error(parsed.error ?? 'Invalid score input.')
         return
       }
 
-      const remainingBefore = getRemainingScore(currentTeamId)
-      if (needsCheckoutPrompt(parsed, remainingBefore)) {
-        setPendingCommand(command)
+      const remainingBefore = getRemainingScore(teamId)
+      const steps = resolveCheckoutFlowSteps(parsed, remainingBefore)
+      if (steps.length > 0) {
+        setPendingScorer(scorer)
+        setPendingCommand(normalizedCommand)
+        setCheckoutSteps(steps)
         setCheckoutOpen(true)
         return
       }
 
-      void submitScore(command)
+      void submitScore(normalizedCommand, scorer)
     },
     [submitScore],
   )
@@ -214,9 +237,9 @@ const ScoreInput: FC<{ disabled?: boolean }> = ({ disabled = false }) => {
 
     if (e.key === 'Enter') {
       e.preventDefault()
-      const command = buildCommand(prefix, value)
-      if (!command || isSubmitting) return
+      if (isSubmitting) return
 
+      const command = buildCommand(prefix, value)
       trySubmit(command)
       return
     }
@@ -245,12 +268,17 @@ const ScoreInput: FC<{ disabled?: boolean }> = ({ disabled = false }) => {
     <>
       <CheckoutFlow
         open={checkoutOpen}
+        steps={checkoutSteps}
         onCancel={cancelCheckout}
         onConfirm={(dartsThrown, checkoutAttempts) => {
-          if (!pendingCommand) return
+          if (!pendingCommand || !pendingScorer) return
           setCheckoutOpen(false)
+          setCheckoutSteps([])
+          const command = pendingCommand
+          const scorer = pendingScorer
           setPendingCommand(null)
-          void submitScore(pendingCommand, { dartsThrown, checkoutAttempts })
+          setPendingScorer(null)
+          void submitScore(command, scorer, { dartsThrown, checkoutAttempts })
         }}
       />
 

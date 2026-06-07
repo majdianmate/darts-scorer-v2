@@ -221,6 +221,15 @@ function getNextTeamId(teams: TeamLocal[], currentTeamId: string): string {
   return teams[nextIdx]!.id
 }
 
+/** Team that lost the leg — throws first in the next leg (standard darts rules). */
+function getLoserTeamId(teams: TeamLocal[], winnerTeamId: string): string {
+  if (teams.length === 2) {
+    return teams.find((team) => team.id !== winnerTeamId)?.id ?? winnerTeamId
+  }
+
+  return getNextTeamId(teams, winnerTeamId)
+}
+
 function advanceTurnAfterScore(
   teams: TeamLocal[],
   match: Match,
@@ -469,27 +478,38 @@ export interface AddScoreOptions {
   }
 }
 
+export interface AddScoreScorer {
+  teamId: string
+  playerId: string
+}
+
 export const addScore = async (
   inputScore: string,
   options?: AddScoreOptions,
+  scorer?: AddScoreScorer,
 ): Promise<boolean> => {
   const state = matchStore.get()
   const match = state.match
-  const currentTeamId = match?.currentTeamId
 
-  if (!match || !currentTeamId) return false
+  if (!match) return false
+
+  const teamId = scorer?.teamId ?? match.currentTeamId
+  const team = state.teams.find((entry) => entry.id === teamId)
+  const playerId = scorer?.playerId ?? team?.currentPlayerId
+
+  if (!teamId || !playerId) return false
 
   if (isMatchEnded(match)) {
     toast.error('Match is already over.')
     return false
   }
 
-  const currentTeam = state.teams.find((team) => team.id === currentTeamId)
-  const currentPlayerId = currentTeam?.currentPlayerId
+  if (teamId !== match.currentTeamId) {
+    toast.error('Turn has changed — score the active team.')
+    return false
+  }
 
-  if (!currentPlayerId) return false
-
-  const remainingBefore = getRemainingScore(currentTeamId)
+  const remainingBefore = getRemainingScore(teamId)
   let parsed = parseScoreStructure(inputScore)
 
   if (!parsed.isValid) {
@@ -523,8 +543,8 @@ export const addScore = async (
   const score = buildScoreFromParsed(parsed, {
     matchId: match.id,
     legId,
-    teamId: currentTeamId,
-    playerId: currentPlayerId,
+    teamId,
+    playerId,
     remainingBefore,
   })
 
@@ -535,35 +555,30 @@ export const addScore = async (
 
   const updatedLegs = appendScoreToLegs(legs, legId, score)
 
-  applyScoreOptimistic(score, currentTeamId, currentPlayerId)
-
-  const afterTurn = advanceTurnAfterScore(
-    matchStore.get().teams,
-    { ...match, legs: updatedLegs },
-    currentTeamId,
-    currentPlayerId,
-  )
+  applyScoreOptimistic(score, teamId, playerId)
 
   let finalLegs = updatedLegs
-  let finalMatch: Match = afterTurn.match
-  let finalTeams = afterTurn.teams
+  let finalMatch: Match = { ...match, legs: updatedLegs }
+  let finalTeams = matchStore.get().teams
 
   if (score.isCheckedOut) {
-    finalLegs = closeLeg(finalLegs, legId, currentTeamId)
+    const winnerTeamId = teamId
+    finalLegs = closeLeg(finalLegs, legId, winnerTeamId)
     finalMatch = { ...finalMatch, legs: finalLegs }
 
     handleLegEndForAllTeams()
     finalTeams = applyStatsSnapshots(finalTeams)
 
     const legsToWin = getLegsToWin(state.matchConfig)
-    const teamLegsWon = countLegsWon(finalLegs, currentTeamId)
+    const teamLegsWon = countLegsWon(finalLegs, winnerTeamId)
 
     if (teamLegsWon >= legsToWin) {
       finalMatch = {
         ...finalMatch,
-        winnerTeamId: currentTeamId,
+        winnerTeamId,
         status: MatchStatus.Ended,
         endedAt: Timestamp.now(),
+        currentRound: finalMatch.currentRound + 1,
       }
     } else {
       const nextLegNumber = finalMatch.currentLeg + 1
@@ -572,14 +587,26 @@ export const addScore = async (
         currentLeg: nextLegNumber,
         legs: finalLegs,
       })
+      const loserTeamId = getLoserTeamId(finalTeams, winnerTeamId)
 
       finalMatch = {
         ...finalMatch,
         legs: nextLeg.legs,
         currentLeg: nextLegNumber,
         currentLegRound: 1,
+        currentTeamId: loserTeamId,
+        currentRound: finalMatch.currentRound + 1,
       }
     }
+  } else {
+    const afterTurn = advanceTurnAfterScore(
+      finalTeams,
+      finalMatch,
+      teamId,
+      playerId,
+    )
+    finalTeams = afterTurn.teams
+    finalMatch = afterTurn.match
   }
 
   matchStore.setState((prev) => ({

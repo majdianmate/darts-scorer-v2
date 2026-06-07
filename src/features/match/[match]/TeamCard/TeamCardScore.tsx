@@ -22,7 +22,7 @@ const TeamCardScore: FC<TeamCardScoreProps> = ({ team, accent }) => {
       <p
         className="relative z-10 font-sans font-black tabular-nums leading-none tracking-tight text-white/95"
         style={{
-          fontSize: 'clamp(3.25rem, 15vh, 7rem)',
+          fontSize: 'clamp(3.25rem, 30vh, 7rem)',
           ...teamCardScoreTextStyle(accent),
         }}
       >

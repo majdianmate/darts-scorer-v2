@@ -17,6 +17,7 @@ import {
   ChartTooltip,
   type ChartConfig,
 } from '#/components/ui/chart'
+import { ScrollArea } from '#/components/ui/scroll-area'
 import { cn } from '#/lib/utils'
 import type { ClubMember } from '../../../../../types/club-types'
 import type { Match, Score, Team } from '../../../../../types/match-types'
@@ -553,7 +554,8 @@ const MatchStatistics: FC<MatchStatisticsProps> = ({ match }) => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <ScrollArea className="h-full min-h-0 [scrollbar-gutter:stable] pr-3">
+      <div className="flex w-full flex-col gap-4 pb-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -699,7 +701,8 @@ const MatchStatistics: FC<MatchStatisticsProps> = ({ match }) => {
         seriesList={seriesList}
         comparisonMode={comparisonMode}
       />
-    </div>
+      </div>
+    </ScrollArea>
   )
 }
 

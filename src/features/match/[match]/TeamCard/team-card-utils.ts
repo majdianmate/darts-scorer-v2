@@ -131,7 +131,7 @@ export function teamCardTabStyle(accent: string, isActive: boolean) {
 
 /** Scrollable stats body — no visible scrollbar. */
 export const teamCardStatsScrollClass =
-  'min-h-0 max-h-[clamp(7.5rem,20vh,11.5rem)] flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+  'min-h-0 flex-1 mb-20 overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
 
 export function teamCardPlayerRingStyle(accent: string, isActive: boolean) {
   return isActive

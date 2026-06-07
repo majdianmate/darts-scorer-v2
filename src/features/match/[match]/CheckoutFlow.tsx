@@ -1,34 +1,52 @@
 import { type FC, useCallback, useEffect, useState } from 'react'
 
+import type { CheckoutFlowStep } from '#/utils/score-parser'
+
 import CountPickerDialog from './CountPickerDialog'
 
 type CheckoutFlowProps = {
   open: boolean
+  steps: CheckoutFlowStep[]
   onCancel: () => void
   onConfirm: (dartsThrown: number, checkoutAttempts: number) => void
 }
 
-type Step = 'darts' | 'checkout'
-
-const CheckoutFlow: FC<CheckoutFlowProps> = ({ open, onCancel, onConfirm }) => {
-  const [step, setStep] = useState<Step>('darts')
+const CheckoutFlow: FC<CheckoutFlowProps> = ({
+  open,
+  steps,
+  onCancel,
+  onConfirm,
+}) => {
+  const [stepIndex, setStepIndex] = useState(0)
   const [dartsThrown, setDartsThrown] = useState(3)
+
+  const currentStep = steps[stepIndex]
 
   useEffect(() => {
     if (!open) return
-    setStep('darts')
+    setStepIndex(0)
     setDartsThrown(3)
-  }, [open])
+  }, [open, steps])
 
   const handleCancel = useCallback(() => {
     onCancel()
   }, [onCancel])
 
-  const handleDartsConfirm = useCallback((value: number) => {
-    if (value < 1 || value > 3) return
-    setDartsThrown(value)
-    setStep('checkout')
-  }, [])
+  const handleDartsConfirm = useCallback(
+    (value: number) => {
+      if (value < 1 || value > 3) return
+      setDartsThrown(value)
+
+      const nextIndex = stepIndex + 1
+      if (nextIndex < steps.length) {
+        setStepIndex(nextIndex)
+        return
+      }
+
+      onConfirm(value, 0)
+    },
+    [onConfirm, stepIndex, steps.length],
+  )
 
   const handleCheckoutConfirm = useCallback(
     (checkoutAttempts: number) => {
@@ -38,9 +56,9 @@ const CheckoutFlow: FC<CheckoutFlowProps> = ({ open, onCancel, onConfirm }) => {
     [dartsThrown, onConfirm],
   )
 
-  if (!open) return null
+  if (!open || !currentStep) return null
 
-  if (step === 'darts') {
+  if (currentStep === 'darts') {
     return (
       <CountPickerDialog
         key="darts"

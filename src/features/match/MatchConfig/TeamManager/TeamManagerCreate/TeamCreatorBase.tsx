@@ -12,6 +12,7 @@ export interface TeamCreatorBaseProps {
   onColorChange: (value: string) => void;
   onIconChange: (value: SquadIconKey) => void;
   disabled?: boolean;
+  namePlaceholder?: string;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ const TeamCreatorBase = ({
   onColorChange,
   onIconChange,
   disabled = false,
+  namePlaceholder = "e.g. Anna & Béla",
   className,
 }: TeamCreatorBaseProps) => (
   <div className={cn("space-y-3", className)}>
@@ -34,7 +36,7 @@ const TeamCreatorBase = ({
         id="team-name"
         value={name}
         onChange={(event) => onNameChange(event.target.value)}
-        placeholder="e.g. Team Alpha"
+        placeholder={namePlaceholder}
         disabled={disabled}
         maxLength={50}
         autoComplete="off"
