@@ -1,15 +1,24 @@
-import { useUser } from '../../../hooks/use-user'
-import { useClubs } from '../../../hooks/use-club'
+import { usePageHeader } from '#/components/Sidebar'
 import { ScrollArea } from '#/components/ui/scroll-area'
-import CreateClubDialog from './ClubCreator/CreateClubDialog'
+import { useClubs } from '../../../hooks/use-club'
+import { useUser } from '../../../hooks/use-user'
 import ClubCard from './ClubCard/ClubCard'
+import CreateClubDialog from './ClubCreator/CreateClubDialog'
 import ClubInvites from './ClubInvites/ClubInvites'
-import MemberManagerDialog from './MemberManager/MemberManagerDialog'
-import ClubEditor from './ClubEditor/ClubEditor'
 
 const Clubs = () => {
   const { user } = useUser()
   const { clubs, isGetClubsLoading } = useClubs(user)
+
+  usePageHeader({
+    title: 'Clubs',
+    toolbar: (
+      <>
+        <ClubInvites />
+        <CreateClubDialog />
+      </>
+    ),
+  })
 
   if (!user) {
     return <p className="text-sm text-muted-foreground">Loading…</p>
@@ -20,23 +29,14 @@ const Clubs = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Clubs</h2>
-        <div className="flex justify-end gap-2">
-          <ClubInvites />
-          <CreateClubDialog />
-        </div>
-      </div>
-      <ScrollArea className="h-[calc(100vh-100px)] [scrollbar-gutter:stable] overflow-y-hidden pr-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pl-4">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <ScrollArea className="min-h-0 flex-1 [scrollbar-gutter:stable]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {clubs.map((club) => (
             <ClubCard key={club.id} club={club} />
           ))}
         </div>
       </ScrollArea>
-      <MemberManagerDialog  />
-      <ClubEditor />
     </div>
   )
 }

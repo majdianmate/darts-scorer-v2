@@ -1,7 +1,7 @@
-import React, { type FC } from 'react'
+import { type FC } from 'react'
 import type { Club } from '../../../../types/club-types'
 import type { DropdownOption } from '#/components/Dropdown/DropdownComponent'
-import { MoreVerticalIcon, Pencil, UserMinus, Users } from 'lucide-react'
+import { ArrowUpRight, MoreVertical, Pencil, Trash2, UserCog, Users } from 'lucide-react'
 import DropdownComponent from '#/components/Dropdown/DropdownComponent'
 import { useUser } from '../../../../hooks/use-user'
 
@@ -11,42 +11,63 @@ interface ClubDropdownProps {
   onEdit?: () => void
   onRemove?: () => void
   onManageMembers?: () => void
-  //onDetailedSquadEditor?: () => void
+  onCreateSquad?: () => void
 }
 
-const ClubDropdown: FC<ClubDropdownProps> = ({ club, onRemove, onManageMembers, onEdit }) => {
+const ClubDropdown: FC<ClubDropdownProps> = ({
+  club,
+  onView,
+  onRemove,
+  onManageMembers,
+  onEdit,
+  onCreateSquad,
+}) => {
   const { user } = useUser()
+  const isOwner = user?.id === club.createdBy.id
+
   const dropdownOptions: DropdownOption[] = [
     {
       label: 'View club',
-      icon: Users,
-      onClick: () => {
-        console.log('View club')
-      },
+      icon: ArrowUpRight,
+      onClick: () => onView?.(),
     },
     {
       label: 'Edit club',
       icon: Pencil,
       onClick: () => onEdit?.(),
-      render: user?.id === club.createdBy.id,
+      render: isOwner,
+    },
+    {
+      label: 'Create squad',
+      icon: Users,
+      onClick: () => onCreateSquad?.(),
     },
     {
       label: 'Manage members',
-      icon: Users,
+      icon: UserCog,
       onClick: () => onManageMembers?.(),
     },
     {
       label: 'Remove club',
-      icon: UserMinus,
+      icon: Trash2,
       onClick: () => onRemove?.(),
       variant: 'destructive',
-      render: user?.id === club.createdBy.id,
+      render: isOwner,
     },
   ]
+
   return (
     <DropdownComponent
       options={dropdownOptions}
-      trigger={<MoreVerticalIcon className="size-4" />}
+      trigger={
+        <button
+          type="button"
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label={`Club actions for ${club.name}`}
+        >
+          <MoreVertical className="size-4" />
+        </button>
+      }
     />
   )
 }

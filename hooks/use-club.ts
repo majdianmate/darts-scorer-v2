@@ -16,8 +16,12 @@ import {
   addClubMemberService,
   addClubGuestService,
   removeClubMemberService,
+  createSquadService,
+  updateSquadService,
+  deleteSquadService,
+  removeSquadMemberService,
 } from "../services/club-service";
-import type { ClubDoc, ClubRole } from "../types/club-types";
+import type { ClubDoc, ClubMember, ClubRole } from "../types/club-types";
 import type { User } from "../types/user-types";
 
 export const useClub = (clubId: string, userId?: string) => {
@@ -122,6 +126,66 @@ export const useClub = (clubId: string, userId?: string) => {
     },
   });
 
+  const createSquad = useMutation({
+    mutationFn: (data: {
+      clubId: string;
+      createdBy: User;
+      data: { name: string; color: string; icon: string; members?: ClubMember[] };
+    }) => createSquadService(data.clubId, data.createdBy, data.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-club", clubId] });
+      queryClient.invalidateQueries({ queryKey: ["get-clubs", userId] });
+      toast.success("Squad created.");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const updateSquad = useMutation({
+    mutationFn: ({
+      squadId,
+      data,
+    }: {
+      squadId: string;
+      data: Partial<{ name: string; color: string; icon: string }>;
+    }) => updateSquadService(squadId, clubId, userId!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-club", clubId] });
+      queryClient.invalidateQueries({ queryKey: ["get-clubs", userId] });
+      toast.success("Squad updated.");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteSquad = useMutation({
+    mutationFn: ({ squadId }: { squadId: string }) =>
+      deleteSquadService(squadId, clubId, userId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-club", clubId] });
+      queryClient.invalidateQueries({ queryKey: ["get-clubs", userId] });
+      toast.success("Squad deleted.");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const removeSquadMember = useMutation({
+    mutationFn: (squadMemberId: string) =>
+      removeSquadMemberService(squadMemberId, userId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-club", clubId] });
+      queryClient.invalidateQueries({ queryKey: ["get-clubs", userId] });
+      toast.success("Player removed from squad.");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
   return {
     club: getClubQuery.data ?? null,
     isGetClubLoading: getClubQuery.isLoading,
@@ -153,6 +217,20 @@ export const useClub = (clubId: string, userId?: string) => {
     removeMember: removeMember.mutate,
     removeMemberAsync: removeMember.mutateAsync,
     isRemoveMemberPending: removeMember.isPending,
+
+    createSquad: createSquad.mutate,
+    createSquadAsync: createSquad.mutateAsync,
+    isCreateSquadPending: createSquad.isPending,
+
+    updateSquad: updateSquad.mutate,
+    updateSquadAsync: updateSquad.mutateAsync,
+    isUpdateSquadPending: updateSquad.isPending,
+
+    deleteSquad: deleteSquad.mutate,
+    isDeleteSquadPending: deleteSquad.isPending,
+
+    removeSquadMember: removeSquadMember.mutate,
+    isRemoveSquadMemberPending: removeSquadMember.isPending,
   };
 };
 

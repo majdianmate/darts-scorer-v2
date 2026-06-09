@@ -42,7 +42,8 @@ export const getOrCreateUserData = async (
 
   const newUser: User = {
     id: firebaseUser.uid,
-    name: firebaseUser.displayName || "Névtelen",
+    name: firebaseUser.displayName || "Anonymous User",
+    displayName: firebaseUser.displayName || "Anonymous User",
     email: firebaseUser.email || "",
     image: firebaseUser.photoURL || "",
     username:
@@ -86,6 +87,7 @@ export const registerWithEmailService = async ({
   const newUser: User = {
     id: firebaseUser.uid,
     name,
+    displayName: name,
     email,
     image: "",
     username: email.split("@")[0],

@@ -1,33 +1,34 @@
-import type { DropdownOption } from '#/components/Dropdown/DropdownComponent'
-import { MoreVerticalIcon, User, UserMinus } from 'lucide-react'
-import React, { type FC } from 'react'
-import type { Friendship } from '../../../../types/friend-types'
-import DropdownComponent from '#/components/Dropdown/DropdownComponent'
+import { MoreVerticalIcon } from 'lucide-react'
+import { type FC } from 'react'
+
+import { ActionDropdown } from '#/components/dropdown'
+import { Button } from '#/components/ui/button'
+
+import { friendDropdownItems } from './friend-dropdown-items'
 
 interface FriendDropdownProps {
-  friendship: Friendship
   onRemove?: () => void
 }
 
-const FriendDropdown: FC<FriendDropdownProps> = ({ friendship, onRemove }) => {
-  const dropdownOptions: DropdownOption[] = [
-    {
-      label: 'View profile',
-      icon: User,
-      onClick: () => {
-        console.log('View profile')
-      },
-      variant: 'default',
-    },
-    {
-      label: 'Remove friend',
-      icon: UserMinus,
-      onClick: () => onRemove?.(),
-      variant: 'destructive',
-    },
-  ]
-
-  return <DropdownComponent options={dropdownOptions} trigger={<MoreVerticalIcon className="size-4" />} />
+const FriendDropdown: FC<FriendDropdownProps> = ({ onRemove }) => {
+  return (
+    <ActionDropdown
+      items={friendDropdownItems}
+      context={{
+        onRemove: () => onRemove?.(),
+      }}
+      trigger={
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="shrink-0 text-muted-foreground"
+          aria-label="More actions"
+        >
+          <MoreVerticalIcon className="size-4" />
+        </Button>
+      }
+    />
+  )
 }
 
 export default FriendDropdown

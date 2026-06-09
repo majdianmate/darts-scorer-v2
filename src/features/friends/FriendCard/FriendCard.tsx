@@ -1,160 +1,193 @@
+import {
+  CalendarDays,
+  Clock3,
+  Loader2,
+  Mail,
+  Swords,
+  User,
+  UserPlus,
+} from 'lucide-react'
+import type { ReactNode } from 'react'
+
 import Avatar from '#/components/Avatar'
-import { Card, CardContent } from '#/components/ui/card'
-import { cn } from '#/lib/utils.ts'
-import { CalendarDays, Loader2 } from 'lucide-react'
-import type { Friendship } from '../../../../types/friend-types'
-import type { User } from '../../../../types/user-types'
+import { Badge } from '#/components/ui/badge'
+import { Button } from '#/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from '#/components/ui/card'
+import { cn } from '#/lib/utils'
+import { useUser } from '../../../../hooks/use-user'
+import { FriendshipStatus, type Friendship } from '../../../../types/friend-types'
+import type { User as AppUser } from '../../../../types/user-types'
 import FriendDropdown from './FriendDropdown'
 
 interface FriendCardProps {
-  friend: User
+  friend: AppUser
   friendship: Friendship
   onRemove?: () => void
+  onView?: () => void
+  onStartMatch?: () => void
   isRemoving?: boolean
   className?: string
 }
 
-const ACCENT_PALETTE = [
-  {
-    gradient: 'from-emerald-500/25 via-teal-500/10 to-transparent',
-    glow: 'bg-emerald-500/15',
-    ring: 'ring-emerald-500/25',
-    badge: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-  },
-  {
-    gradient: 'from-cyan-500/25 via-sky-500/10 to-transparent',
-    glow: 'bg-cyan-500/15',
-    ring: 'ring-cyan-500/25',
-    badge: 'border-cyan-500/25 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300',
-  },
-  {
-    gradient: 'from-violet-500/25 via-purple-500/10 to-transparent',
-    glow: 'bg-violet-500/15',
-    ring: 'ring-violet-500/25',
-    badge: 'border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-300',
-  },
-  {
-    gradient: 'from-amber-500/25 via-orange-500/10 to-transparent',
-    glow: 'bg-amber-500/15',
-    ring: 'ring-amber-500/25',
-    badge: 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300',
-  },
-  {
-    gradient: 'from-rose-500/25 via-pink-500/10 to-transparent',
-    glow: 'bg-rose-500/15',
-    ring: 'ring-rose-500/25',
-    badge: 'border-rose-500/25 bg-rose-500/10 text-rose-700 dark:text-rose-300',
-  },
-] as const
+type TimestampLike = { toDate?: () => Date }
 
-function getAccentFromName(name: string) {
-  const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  return ACCENT_PALETTE[hash % ACCENT_PALETTE.length]
-}
+function formatDate(value: TimestampLike | null | undefined) {
+  if (!value || typeof value.toDate !== 'function') return '—'
 
-function formatFriendSince(createdAt: Friendship['createdAt']) {
-  if (!createdAt || typeof createdAt.toDate !== 'function') return null
-
-  return createdAt.toDate().toLocaleDateString(undefined, {
+  return value.toDate().toLocaleDateString(undefined, {
+    day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
+}
+
+function formatStatus(status: FriendshipStatus) {
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}
+
+function InfoItem({
+  icon,
+  label,
+  value,
+  className,
+}: {
+  icon: ReactNode
+  label: string
+  value: ReactNode
+  className?: string
+}) {
+  return (
+    <div className={cn('min-w-0 space-y-1', className)}>
+      <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+        {label}
+      </p>
+      <div className="flex min-w-0 items-center gap-1.5 text-sm text-foreground">
+        <span className="shrink-0 text-muted-foreground">{icon}</span>
+        <span className="min-w-0 truncate">{value}</span>
+      </div>
+    </div>
+  )
 }
 
 const FriendCard = ({
   friend,
   friendship,
   onRemove,
+  onView,
+  onStartMatch,
   isRemoving = false,
   className,
 }: FriendCardProps) => {
-  const friendSince = formatFriendSince(friendship.createdAt)
-  const accent = getAccentFromName(friend.name)
+  const { user } = useUser()
+  const requestedByCurrentUser = friendship.senderId === user?.id
+  const requestLabel = requestedByCurrentUser
+    ? 'You'
+    : friendship.sender.name
 
   return (
     <Card
-      size="sm"
       className={cn(
-        'group relative overflow-hidden py-0 transition-all duration-300',
-        'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5',
-        'ring-1 ring-foreground/10 hover:ring-foreground/15',
+        'relative gap-0 py-0 transition-shadow hover:shadow-md',
         isRemoving && 'pointer-events-none',
         className,
       )}
     >
-      <div
-        className={cn(
-          'pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b',
-          accent.gradient,
-        )}
-      />
-      <div
-        className={cn(
-          'pointer-events-none absolute -right-6 -top-6 size-24 rounded-full blur-2xl',
-          accent.glow,
-        )}
-      />
+      <CardHeader className="flex flex-row items-start gap-4 border-b border-border/60 py-4">
+        <Avatar
+          name={friend.name}
+          image={friend.image}
+          size="lg"
+          className="shrink-0 ring-1 ring-border"
+        />
 
-      <CardContent className="relative p-0">
-        <div
-          className={cn(
-            'flex flex-col gap-4 p-4 transition-all duration-300',
-            isRemoving && 'scale-[0.98] blur-sm opacity-50',
-          )}
-        >
+        <div className="min-w-0 flex-1 space-y-1">
           <div className="flex items-start justify-between gap-2">
-            <span
-              className={cn(
-                'rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-                accent.badge,
-              )}
-            >
-              Friend
-            </span>
+            <div className="min-w-0">
+              <h3 className="truncate text-base font-semibold text-foreground">
+                {friend.name}
+              </h3>
+              <p className="truncate text-sm text-muted-foreground">
+                @{friend.username}
+              </p>
+            </div>
 
-            {!isRemoving && (
-              <FriendDropdown friendship={friendship} onRemove={onRemove} />
-            )}
+            {!isRemoving ? <FriendDropdown onRemove={onRemove} /> : null}
           </div>
 
-          <div className="flex flex-col items-center gap-3 text-center">
-            <div className="relative">
-              <div
-                className={cn(
-                  'absolute -inset-1 rounded-full opacity-60 blur-md transition-opacity group-hover:opacity-100',
-                  accent.glow,
-                )}
-              />
-              <Avatar
-                name={friend.name}
-                image={friend.image}
-                size="lg"
-                className={cn('relative ring-2', accent.ring)}
-              />
-            </div>
-
-            <div className="min-w-0 space-y-0.5">
-              <p className="truncate font-semibold text-foreground">{friend.name}</p>
-              <p className="truncate text-sm text-muted-foreground">@{friend.username}</p>
-            </div>
+          <div className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+            <Mail className="size-3.5 shrink-0" />
+            <span className="truncate">{friend.email}</span>
           </div>
-
-          {friendSince && (
-            <div className="flex items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-              <CalendarDays className="size-3.5 shrink-0 opacity-70" />
-              <span>Friends since {friendSince}</span>
-            </div>
-          )}
         </div>
+      </CardHeader>
 
-        {isRemoving && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
-            <div className="flex size-10 items-center justify-center rounded-full border border-border/60 bg-background/80 shadow-sm backdrop-blur-sm">
-              <Loader2 className="size-5 animate-spin text-muted-foreground" />
-            </div>
-          </div>
-        )}
+      <CardContent className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2">
+        <InfoItem
+          icon={<CalendarDays className="size-3.5" />}
+          label="Friends since"
+          value={formatDate(friendship.createdAt)}
+        />
+        <InfoItem
+          icon={<UserPlus className="size-3.5" />}
+          label="Requested by"
+          value={requestLabel}
+        />
+        <InfoItem
+          icon={<CalendarDays className="size-3.5" />}
+          label="Member since"
+          value={formatDate(friend.createdAt)}
+        />
+        <InfoItem
+          icon={<Clock3 className="size-3.5" />}
+          label="Last updated"
+          value={formatDate(friendship.updatedAt)}
+        />
+        <InfoItem
+          icon={<User className="size-3.5" />}
+          label="Friendship status"
+          value={
+            <Badge variant="secondary" className="font-normal">
+              {formatStatus(friendship.status)}
+            </Badge>
+          }
+          className="sm:col-span-2"
+        />
       </CardContent>
+
+      <CardFooter className="gap-2 border-t border-border/60 bg-muted/30 py-3">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          disabled={isRemoving}
+          onClick={onView}
+        >
+          <User className="size-4" />
+          View
+        </Button>
+        <Button
+          type="button"
+          className="flex-1"
+          disabled={isRemoving}
+          onClick={onStartMatch}
+        >
+          <Swords className="size-4" />
+          Start match
+        </Button>
+      </CardFooter>
+
+      {isRemoving ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-[1px]">
+          <div className="flex size-10 items-center justify-center rounded-full border border-border bg-background shadow-sm">
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          </div>
+        </div>
+      ) : null}
     </Card>
   )
 }

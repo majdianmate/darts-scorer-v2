@@ -33,7 +33,7 @@ export interface Club extends ClubDoc {
   createdBy: User;
   members: ClubMember[];
   invitations: ClubMember[];
-  //squads: Squad[];
+  squads: Squad[];
 }
 
 export interface ClubMemberDoc {
@@ -68,6 +68,7 @@ export interface SquadDoc {
   name: string;
   color: string;
   icon: string;
+  createdBy: User;
   createdById: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -77,6 +78,7 @@ export interface SquadDoc {
 export interface SquadMemberDoc {
   squadId: string;
   clubId: string;
+  member: ClubMember;
   membershipId: string;
   addedById: string;
   addedAt: Timestamp;
