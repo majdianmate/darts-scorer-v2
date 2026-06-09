@@ -1,20 +1,28 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-"use client";
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import React, { type JSX, type SVGProps, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useUser } from "../../../hooks/use-user";
-import { useNavigate } from '@tanstack/react-router'
+
+type SignInSearch = {
+  redirect?: string
+}
 
 export const Route = createFileRoute('/(auth)/sign-in')({
+  validateSearch: (search: Record<string, unknown>): SignInSearch => ({
+    redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
+  }),
   component: RouteComponent,
 })
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
   const { loginWithGoogle, loginWithEmail } = useUser();
+
+  const redirectTo = redirect && redirect.startsWith('/') ? redirect : '/match';
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -26,7 +34,9 @@ function RouteComponent() {
     setIsSubmitting(true);
     try {
       await loginWithEmail({ email, password });
-      navigate({ to: "/dashboard" });
+      navigate({ href: redirectTo });
+    } catch {
+      // useUser shows toast on error
     } finally {
       setIsSubmitting(false);
     }
@@ -37,15 +47,16 @@ function RouteComponent() {
     setIsSubmitting(true);
     try {
       await loginWithGoogle();
-      navigate({ to: "/dashboard" });
+      navigate({ href: redirectTo });
+    } catch {
+      // useUser shows toast on error
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="z-10">
-      <div className="mx-auto w-full max-w-sm">
+    <div className="mx-auto w-full max-w-sm bg-background rounded-lg shadow-lg p-10">
         <h2 className="text-balance text-center text-lg font-semibold text-foreground">
           Log in or create account
         </h2>
@@ -129,7 +140,6 @@ function RouteComponent() {
           </Link>
         </p>
       </div>
-    </div>
   );
 };
 

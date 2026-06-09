@@ -1,0 +1,298 @@
+title,list,description,group,priority,labels
+001. Foundation — Audit,Metódusok,"Jelenlegi stack, route-ok, mappák és halott függőségek dokumentálása.
+
+Elfogadási kritérium: Van naprakész architektúra-összefoglaló (ARCHITECTURE.md).",Foundation,P0,refactor
+002. Foundation — Architektúra döntések,Metódusok,"Firebase marad; src/-ba konszolidálás; #/ alias; auth guard; TeamCard showcase izolálás.
+
+Elfogadási kritérium: Minden döntés ADR formában rögzítve.",Foundation,P0,refactor
+003. Foundation — Halott kód takarítás,Metódusok,"Drizzle/Supabase/pg eltávolítása; / redirect; README frissítés.
+
+Elfogadási kritérium: npm run build és npm run lint hibamentes.",Foundation,P0,tech-debt
+004. Foundation — Mappa struktúra,Metódusok,"hooks/, services/, store/, types/ áthelyezése src/ alá.
+
+Elfogadási kritérium: Nincs domain fájl a gyökérben.",Foundation,P0,refactor
+005. Foundation — Import alias,Metódusok,"Csak #/ alias; relatív importok minimalizálása.
+
+Elfogadási kritérium: Egységes import konvenció az egész projektben.",Foundation,P0,refactor
+006. Foundation — Firebase env,Metódusok,"Hardcoded config → import.meta.env + .env.example.
+
+Elfogadási kritérium: Nincs API key a forráskódban.",Foundation,P0,refactor
+007. Foundation — Auth guard,Metódusok,"(protected) layout beforeLoad redirect nem autentikált usereknek.
+
+Elfogadási kritérium: Kijelentkezve nem érhető el védett oldal.",Foundation,P0,feature
+008. Foundation — Query key konvenció,Metódusok,"Egységes React Query kulcsok (pl. [""clubs"", id]).
+
+Elfogadási kritérium: Minden hook követi az új konvenciót.",Foundation,P1,refactor
+009. Foundation — Dialog state,Metódusok,"Globális dialog mount egy helyen; duplikáció törlése (ClubsLayout vs clubs.tsx).
+
+Elfogadási kritérium: Minden dialog pontosan egyszer mountolódik.",Foundation,P1,refactor
+010. Foundation — App entry,UI,"/ → /match redirect; stub oldalak kezelése.
+
+Elfogadási kritérium: App induláskor a megfelelő helyre visz.",Foundation,P1,feature
+011. Foundation — Teljes alap teszt,Integrációs teszt,"Build + lint + auth guard + redirect + env config + mappa struktúra ellenőrzése.
+
+Elfogadási kritérium: Kijelentkezve redirect /sign-in; bejelentkezve /match; build zöld; nincs halott import.",Foundation,P0,refactor
+012. Auth — Sign In,Metódusok,"Email/jelszó és Google bejelentkezés (user-service, useUser).
+
+Elfogadási kritérium: Mindkét módszer user doc-ot hoz létre vagy betölt.",Auth,P0,feature
+013. Auth — Sign Up,Metódusok,"Regisztráció validációval.
+
+Elfogadási kritérium: Sikeres regisztráció után bejelentkezett állapot.",Auth,P0,feature
+014. Auth — Sign Out,Metódusok,"Kijelentkezés minden helyről.
+
+Elfogadási kritérium: Sign out után auth state null és redirect.",Auth,P0,feature
+015. Auth — Forgot Password,Metódusok,"Jelszó reset email küldés.
+
+Elfogadási kritérium: Success/error üzenet megjelenik.",Auth,P1,feature
+016. Auth — User CRUD,Metódusok,"getOrCreateUserData; user profil lekérés.
+
+Elfogadási kritérium: Első login létrehozza a Firestore user doc-ot.",Auth,P0,feature
+017. Auth — Sign In oldal,UI,"Email + Google form; hibakezelés; redirect param.
+
+Elfogadási kritérium: Hibás loginnál üzenet; sikeresnél redirect.",Auth,P0,feature
+018. Auth — Sign Up oldal,UI,"Regisztrációs form validációval.
+
+Elfogadási kritérium: Invalid inputnál inline hiba.",Auth,P0,feature
+019. Auth — Forgot Password oldal,UI,"Email input + visszajelzés.
+
+Elfogadási kritérium: Küldés után egyértelmű állapot.",Auth,P1,feature
+020. Auth — Sidebar user panel,UI,"User info + sign out gomb.
+
+Elfogadási kritérium: Név/email látszik és sign out működik.",Auth,P1,feature
+021. Auth — Teljes flow teszt,Integrációs teszt,"Sign up → sign out → sign in → forgot password → redirect.
+
+Elfogadási kritérium: Regisztráció → bejelentkezve → kijelentkezés → újra bejelentkezés → védett oldal elérhető → kijelentkezve redirect /sign-in.",Auth,P0,feature
+022. Friends — CRUD,Metódusok,"addFriend, getFriends, removeFriend (friend-service).
+
+Elfogadási kritérium: Minden metódus Firestore-ban konzisztens adatot ír/olvas.",Friends,P0,feature
+023. Friends — Manage invites,Metódusok,"getPendingRequests, acceptFriend, rejectFriend.
+
+Elfogadási kritérium: Pending → accept/reject után a friendship státusz helyes.",Friends,P0,feature
+024. Friends — Friend list,UI,"FriendCard lista loading/empty/error állapottal.
+
+Elfogadási kritérium: Üres és tele állapot is rendben néz ki.",Friends,P1,feature
+025. Friends — Add friend,UI,"NewFriendDialog user kereséssel (MiniSearch).
+
+Elfogadási kritérium: Keresés → kiválasztás → küldés működik.",Friends,P1,feature
+026. Friends — Friend actions,UI,"FriendDropdown remove művelet.
+
+Elfogadási kritérium: Törlés után a lista frissül.",Friends,P1,feature
+027. Friends — Pending requests,UI,"FriendRequests accept/reject gombokkal.
+
+Elfogadási kritérium: Accept után megjelenik a friend listában.",Friends,P1,feature
+028. Friends — Teljes flow teszt,Integrációs teszt,"Add → pending → accept → list → remove.
+
+Elfogadási kritérium: A meghív → B-nél pending megjelenik → accept → A-nál és B-nél friend listában látszik → remove → mindkét oldalon eltűnik; UI azonnal frissül.",Friends,P0,feature
+029. Clubs — CRUD,Metódusok,"createClub, getClub, getClubs, updateClub, removeClub.
+
+Elfogadási kritérium: Create/update/delete Firestore-ban helyes; delete csak Leader-nek.",Clubs,P0,feature
+030. Clubs — Members,Metódusok,"addMember, removeMember (global, friends, guest).
+
+Elfogadási kritérium: Guest és user is hozzáadható/eltávolítható jogosultság szerint.",Clubs,P0,feature
+031. Clubs — Invites,Metódusok,"getIncomingInvites; accept/decline club meghívók.
+
+Elfogadási kritérium: Invite flow végig működik.",Clubs,P0,feature
+032. Clubs — Squads CRUD,Metódusok,"createSquad, updateSquad, removeSquad.
+
+Elfogadási kritérium: Squad létrehozás icon/color/members-szel működik.",Clubs,P0,feature
+033. Clubs — Squad members,Metódusok,"Squad member add/remove.
+
+Elfogadási kritérium: Tag hozzáadás/eltávolítás frissíti a squad doc-ot.",Clubs,P0,feature
+034. Clubs — Jogosultságok,Metódusok,"Role check minden metódusnál (Leader/Captain/Member/Guest).
+
+Elfogadási kritérium: Minden metódus a permission matrix szerint enged vagy tilt — Leader mindent; Captain nem töröl clubot; Member csak tagot adhat; Guest csak olvas.",Clubs,P0,feature
+035. Clubs — Club list,UI,"clubs.tsx grid; create gomb.
+
+Elfogadási kritérium: Clubok listázódnak; üres állapot rendben.",Clubs,P1,feature
+036. Clubs — Club card,UI,"ClubCard dropdown, members, invites, squads szekciók.
+
+Elfogadási kritérium: Minden szekció betölt és interaktív.",Clubs,P1,feature
+037. Clubs — Club dropdown,UI,"Edit/delete actions role alapján.
+
+Elfogadási kritérium: Delete csak Leader-nek látszik.",Clubs,P1,feature
+038. Clubs — Member list,UI,"ClubCardMemberList + ClubMemberDropdown.
+
+Elfogadási kritérium: Tagok listázódnak; remove/role change működik.",Clubs,P1,feature
+039. Clubs — Invite list,UI,"ClubCardInvitations accept/decline.
+
+Elfogadási kritérium: Pending invite kezelhető.",Clubs,P1,feature
+040. Clubs — Squad list,UI,"ClubCardSquadList + SquadDropdown + squad members.
+
+Elfogadási kritérium: Squadok és tagjaik látszanak.",Clubs,P1,feature
+041. Clubs — Create/Edit club,UI,"CreateClubDialog, ClubEditor form.
+
+Elfogadási kritérium: Név/leírás szerkeszthető; validáció működik.",Clubs,P1,feature
+042. Clubs — Member manager,UI,"MemberManagerDialog user/guest pickerrel.
+
+Elfogadási kritérium: Global/friends/guest forrásból választható.",Clubs,P1,feature
+043. Clubs — Squad creator/editor,UI,"SquadCreator, SquadEditor icon+color pickerrel.
+
+Elfogadási kritérium: Squad létrehozás/szerkesztés UI-ból működik.",Clubs,P1,feature
+044. Clubs — Club detail tabs,UI,"Members, Invitations, Squads, Matches, Settings.
+
+Elfogadási kritérium: Minden tab betölt és a megfelelő adatot mutatja.",Clubs,P1,feature
+045. Clubs — Teljes flow teszt,Integrációs teszt,"Create → add member → create squad → invite → role permissions.
+
+Elfogadási kritérium: Leader létrehoz clubot → meghív tagot → tag accept → Captain hozzáad squadot → Member nem törölheti a clubot → Guest nem szerkeszthet → minden művelet után UI frissül → club delete csak Leader-nek elérhető és működik.",Clubs,P0,feature
+046. Match Config — Create,Metódusok,"createMatch Firestore-ba (match-service).
+
+Elfogadási kritérium: Match doc létrejön helyes config-gal.",Match,P0,feature
+047. Match Config — Get/Subscribe,Metódusok,"getMatch, subscribeToMatch real-time sync.
+
+Elfogadási kritérium: Snapshot → store hydrate működik.",Match,P0,feature
+048. Match Config — Team builder,Metódusok,"members-to-team, squad-to-team, randomTeamGenerator.
+
+Elfogadási kritérium: Manual/squad/random csapatok helyes Team objektumot adnak.",Match,P0,feature
+049. Match Scoring — Score parser,Metódusok,"score-parser.ts szöveg → dart (T20, D16, 25, miss).
+
+Elfogadási kritérium: Minden valid/invalid input helyesen parse-olódik.",Match,P0,feature
+050. Match Scoring — Score builder,Metódusok,"score-builder.ts dart → Score objektum.
+
+Elfogadási kritérium: Score struktúra helyes.",Match,P0,feature
+051. Match Scoring — Leg utils,Metódusok,"match-leg-utils.ts bust, checkout, leg win.
+
+Elfogadási kritérium: Bust nem ment score-t; checkout mode szerint zárul a leg.",Match,P0,feature
+052. Match Scoring — Stats engine,Metódusok,"stats-engine.ts átlag, first 9, checkout stats.
+
+Elfogadási kritérium: Számítások helyesek; unit teszt zöld.",Match,P0,feature
+053. Match Scoring — Store actions,Metódusok,"addScore, undoLastScore, leg/match win (match-store).
+
+Elfogadási kritérium: Score hozzáadás Firestore sync-kel működik; undo visszaállítja az állapotot.",Match,P0,feature
+054. Match Scoring — Add score service,Metódusok,"addScoreToMatch Firestore írás.
+
+Elfogadási kritérium: Score perzisztál és subscription frissít.",Match,P0,feature
+055. Match Stats — Player stats,Metódusok,"compute-player-match-stats.ts játékos statisztikák.
+
+Elfogadási kritérium: Meccs végén helyes átlag, first 9, 180s.",Match,P1,feature
+056. Match Stats — Match list,Metódusok,"getUserMatches user meccsei.
+
+Elfogadási kritérium: Aktív és befejezett meccsek listázódnak.",Match,P1,feature
+057. Match Config — Match config dialog,UI,"Game mode, checkout mode, leg count.
+
+Elfogadási kritérium: Config kiválasztható és menthető.",Match,P1,feature
+058. Match Config — Team manager create,UI,"TeamManagerCreate manual játékos választás.
+
+Elfogadási kritérium: UserPicker-rel csapat összeállítható.",Match,P1,feature
+059. Match Config — Team manager add squad,UI,"TeamManagerAdd squad választás.
+
+Elfogadási kritérium: Club squad importálható csapatba.",Match,P1,feature
+060. Match Config — Team manager random,UI,"TeamManagerRandom random csapat generálás.
+
+Elfogadási kritérium: Random split működik.",Match,P1,feature
+061. Match Config — Starting team picker,UI,"Ki kezd választás.
+
+Elfogadási kritérium: Starting team beállítható.",Match,P1,feature
+062. Match Live — Match page,UI,"Match.tsx tabs: match / statistics.
+
+Elfogadási kritérium: Élő meccs betölt és tab váltás működik.",Match,P0,feature
+063. Match Live — Score input,UI,"ScoreInput.tsx billentyűzet + gyorsgombok.
+
+Elfogadási kritérium: Score bevihető és submit működik.",Match,P0,feature
+064. Match Live — Score display,UI,"ScoreDisplay.tsx animáció, confetti.
+
+Elfogadási kritérium: Score megjelenik animációval.",Match,P1,feature
+065. Match Live — Checkout flow,UI,"CheckoutFlow.tsx + CountPickerDialog.
+
+Elfogadási kritérium: Checkout-nál dart count választható.",Match,P0,feature
+066. Match Live — Team card,UI,"TeamCard score, players, stats, leg indicator.
+
+Elfogadási kritérium: Aktív játékos kiemelve; score history látszik.",Match,P0,feature
+067. Match Live — Team card stats,UI,"TeamCardStats.tsx live átlag, first 9.
+
+Elfogadási kritérium: Statisztikák real-time frissülnek dobás után.",Match,P0,feature
+068. Match Live — Match win dialog,UI,"MatchWinDialog.tsx győztes megjelenítés.
+
+Elfogadási kritérium: Match végén dialog megjelenik.",Match,P1,feature
+069. Match List & Stats — Match list,UI,"MatchList + MatchListItem státusz, dátum.
+
+Elfogadási kritérium: Meccsek listázódnak; új meccs gomb nyitja a configot.",Match,P1,feature
+070. Match List & Stats — Statistics tab,UI,"MatchStatistics + MatchStatsTable + chartok.
+
+Elfogadási kritérium: Meccs végén/statistics tabon helyes adatok.",Match,P1,feature
+071. Match — Teljes flow teszt,Integrációs teszt,"Config → scoring → leg win → match win → stats.
+
+Elfogadási kritérium: Meccs létrehozás → score input (T20, D16 checkout) → bust nem ment → undo visszavonja → leg win → új leg indul → team rotation helyes → match win dialog → statistics tab helyes átlagot mutat → match listában megjelenik; UI minden lépésnél frissül.",Match,P0,feature
+072. Shared — Design tokens,Metódusok,"styles.css OKLCH tokenek dokumentálása.
+
+Elfogadási kritérium: Tokenek kategorizálva és használva.",Shared,P1,refactor
+073. Shared — shadcn audit,Metódusok,"components/ui/ használat és hiányok.
+
+Elfogadási kritérium: Nincs felesleges vagy hiányzó kritikus komponens.",Shared,P1,refactor
+074. Shared — UserPicker API,Metódusok,"selected, onSelect, source, locked, exclude, onSearch.
+
+Elfogadási kritérium: API megfelel a specnek; minden feature használja.",Shared,P0,refactor
+075. Shared — IconPicker,Metódusok,"Squad icon registry.
+
+Elfogadási kritérium: Ikon választás működik squad create-nél.",Shared,P2,refactor
+076. Shared — Dropdown,Metódusok,"DropdownComponent vs shadcn egységesítés.
+
+Elfogadási kritérium: Egy dropdown megoldás van.",Shared,P1,refactor
+077. Shared — Avatar,Metódusok,"Avatar, AvatarGroup cleanup.
+
+Elfogadási kritérium: Nincs console.log; prop típusok rendben.",Shared,P2,refactor
+078. Shared — Sidebar,UI,"Nav, clubs section, user panel, theme toggle.
+
+Elfogadási kritérium: Minden route-on konzisztens; mobil-barát.",Shared,P1,refactor
+079. Shared — Page header,UI,"AppPageHeader, PageHeaderCenter, PageHeaderToolbar egységesítés.
+
+Elfogadási kritérium: Page title és toolbar működik.",Shared,P1,refactor
+080. Shared — Theme,UI,"Dark/light toggle, theme-provider.
+
+Elfogadási kritérium: Theme váltás perzisztál.",Shared,P2,refactor
+081. Shared — Toasts,UI,"Sonner értesítések success/error.
+
+Elfogadási kritérium: Mutation-ök visszajelzést adnak.",Shared,P2,refactor
+082. Shared — UI konzisztencia teszt,Integrációs teszt,"Sidebar, header, theme, picker, dropdown minden feature-ben.
+
+Elfogadási kritérium: Sidebar navigáció működik → theme váltás → UserPicker clubs és match config-ban is működik → dropdown-ok egységesek → toast üzenetek mutation után megjelennek.",Shared,P1,refactor
+083. App — Route map,Metódusok,"Minden route dokumentálva és működik.
+
+Elfogadási kritérium: Nincs broken route.",App,P1,feature
+084. App — Page title,Metódusok,"resolve-page-title.ts route → cím.
+
+Elfogadási kritérium: Minden oldalon helyes cím.",App,P2,feature
+085. App — Settings oldal,UI,"Profil szerkesztés, jelszó változtatás (stub → implement).
+
+Elfogadási kritérium: Legalább név szerkeszthető.",App,P2,feature
+086. App — Help oldal,UI,"Gyors útmutató, FAQ (stub → implement).
+
+Elfogadási kritérium: Alap dokumentáció elérhető.",App,P3,feature
+087. App — Patch notes,UI,"PatchNotes release history.
+
+Elfogadási kritérium: Naprakész release lista.",App,P3,feature
+088. App — Navigáció teszt,Integrációs teszt,"Sidebar minden link, page title, settings/help.
+
+Elfogadási kritérium: Minden sidebar link a megfelelő oldalra visz → page title helyes → settings mentés működik → help olvasható.",App,P2,feature
+089. Tests — score-parser,Metódusok,"T20, D16, 25, miss, invalid input tesztek.
+
+Elfogadási kritérium: Minden edge case zöld.",Tests,P0,refactor
+090. Tests — match-leg-utils,Metódusok,"Bust, checkout, leg win tesztek.
+
+Elfogadási kritérium: Checkout mode-ok helyesen működnek.",Tests,P0,refactor
+091. Tests — stats-engine,Metódusok,"Átlag, first 9 (már létezik, bővítés).
+
+Elfogadási kritérium: Coverage bővült.",Tests,P1,refactor
+092. Tests — match-store,Metódusok,"addScore, undo, leg win, rotation tesztek.
+
+Elfogadási kritérium: Kritikus store action-ök tesztelve.",Tests,P0,refactor
+093. Quality — Kódminőség sweep,UI,"console.log törlés; typo fix (randomTeamGenerator); lint.
+
+Elfogadási kritérium: npm run lint 0 error.",Tests,P1,tech-debt
+094. Quality — Vitest config,UI,"Coverage; CI integráció.
+
+Elfogadási kritérium: npm run test CI-ben fut.",Tests,P2,refactor
+095. Tests — CI pipeline teszt,Integrációs teszt,"Lint + test + build minden PR-nél.
+
+Elfogadási kritérium: PR-nél CI zöld → unit tesztek futnak → build sikeres → Firebase preview deploy működik.",Tests,P1,refactor
+096. Deploy — CI/CD,Metódusok,"GitHub Actions lint/test/build + Firebase deploy.
+
+Elfogadási kritérium: Main merge után automatikus deploy.",Deploy,P1,refactor
+097. Deploy — Env secrets,Metódusok,"Firebase config CI-ben.
+
+Elfogadási kritérium: Prod build env változókkal készül.",Deploy,P1,refactor
+098. Deploy — Performance,UI,"Bundle size; lazy loading; TeamCards prod kizárás.
+
+Elfogadási kritérium: Initial bundle elfogadható méretű.",Deploy,P2,refactor
+099. Deploy — Éles teszt,Integrációs teszt,"Prod URL, auth, scoring, sync.
+
+Elfogadási kritérium: Éles URL betölt → bejelentkezés → meccs indítás → score sync több eszközön → sign out működik.",Deploy,P1,refactor

@@ -41,7 +41,8 @@ export const getOrCreateUserData = async (
 
   const newUser: User = {
     id: firebaseUser.uid,
-    name: firebaseUser.displayName || "Névtelen",
+    name: firebaseUser.displayName || "User Name",
+    displayName: firebaseUser.displayName || "User Display Name",
     email: firebaseUser.email || "",
     image: firebaseUser.photoURL || "",
     username:
@@ -75,7 +76,8 @@ export const registerWithEmailService = async ({
   email,
   password,
   name,
-}: AuthCredentials & { name: string }): Promise<User> => {
+  displayName,
+}: AuthCredentials & { name: string, displayName: string }): Promise<User> => {
   const { user: firebaseUser } = await createUserWithEmailAndPassword(
     auth,
     email,
@@ -85,6 +87,7 @@ export const registerWithEmailService = async ({
   const newUser: User = {
     id: firebaseUser.uid,
     name,
+    displayName,
     email,
     image: "",
     username: email.split("@")[0],

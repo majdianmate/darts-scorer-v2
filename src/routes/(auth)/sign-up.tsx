@@ -15,6 +15,7 @@ function RouteComponent() {
   const { loginWithGoogle, registerWithEmail } = useUser();
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
+  const [displayName, setDisplayName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -25,6 +26,7 @@ function RouteComponent() {
   const canSubmit =
     !isSubmitting &&
     name.trim().length > 0 &&
+    displayName.trim().length > 0 &&
     email.trim().length > 0 &&
     password.length >= 6 &&
     password === confirmPassword;
@@ -36,10 +38,11 @@ function RouteComponent() {
     try {
       await registerWithEmail({
         name: name.trim(),
+        displayName: displayName.trim(),
         email: email.trim(),
         password,
       });
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/match" });
     } finally {
       setIsSubmitting(false);
     }
@@ -50,14 +53,14 @@ function RouteComponent() {
     setIsSubmitting(true);
     try {
       await loginWithGoogle();
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/match" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="mx-auto w-full max-w-sm">
+    <div className="mx-auto w-full max-w-sm bg-background rounded-lg shadow-lg p-10">
       <h2 className="text-balance text-center text-lg font-semibold text-foreground">
         Create your account
       </h2>
@@ -77,6 +80,23 @@ function RouteComponent() {
             className="mt-1 h-11 border-2 px-3 text-sm font-medium shadow-none"
             value={name}
             onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label
+            htmlFor="display-name-signup-02"
+            className="text-sm font-semibold text-foreground"
+          >
+            Display Name
+          </Label>
+          <Input
+            id="display-name-signup-02"
+            type="text"
+            autoComplete="display-name"
+            placeholder="John Doe Display Name"
+            className="mt-1 h-11 border-2 px-3 text-sm font-medium shadow-none"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
           />
         </div>
         <div>

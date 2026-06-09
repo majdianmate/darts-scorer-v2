@@ -9,36 +9,88 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as protectedRouteRouteImport } from './routes/(protected)/route'
+import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as dashboardDashboardRouteImport } from './routes/(dashboard)/dashboard'
+import { Route as protectedSettingsRouteImport } from './routes/(protected)/settings'
+import { Route as protectedPatch_notesRouteImport } from './routes/(protected)/patch_notes'
+import { Route as protectedMatchRouteImport } from './routes/(protected)/match'
+import { Route as protectedIdeasRouteImport } from './routes/(protected)/ideas'
+import { Route as protectedHelpRouteImport } from './routes/(protected)/help'
+import { Route as protectedFriendsRouteImport } from './routes/(protected)/friends'
+import { Route as protectedDashboardRouteImport } from './routes/(protected)/dashboard'
+import { Route as protectedClubsRouteImport } from './routes/(protected)/clubs'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 
+const protectedRouteRoute = protectedRouteRouteImport.update({
+  id: '/(protected)',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authRouteRoute = authRouteRouteImport.update({
+  id: '/(auth)',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const dashboardDashboardRoute = dashboardDashboardRouteImport.update({
-  id: '/(dashboard)/dashboard',
+const protectedSettingsRoute = protectedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => protectedRouteRoute,
+} as any)
+const protectedPatch_notesRoute = protectedPatch_notesRouteImport.update({
+  id: '/patch_notes',
+  path: '/patch_notes',
+  getParentRoute: () => protectedRouteRoute,
+} as any)
+const protectedMatchRoute = protectedMatchRouteImport.update({
+  id: '/match',
+  path: '/match',
+  getParentRoute: () => protectedRouteRoute,
+} as any)
+const protectedIdeasRoute = protectedIdeasRouteImport.update({
+  id: '/ideas',
+  path: '/ideas',
+  getParentRoute: () => protectedRouteRoute,
+} as any)
+const protectedHelpRoute = protectedHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => protectedRouteRoute,
+} as any)
+const protectedFriendsRoute = protectedFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => protectedRouteRoute,
+} as any)
+const protectedDashboardRoute = protectedDashboardRouteImport.update({
+  id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => protectedRouteRoute,
+} as any)
+const protectedClubsRoute = protectedClubsRouteImport.update({
+  id: '/clubs',
+  path: '/clubs',
+  getParentRoute: () => protectedRouteRoute,
 } as any)
 const authSignUpRoute = authSignUpRouteImport.update({
-  id: '/(auth)/sign-up',
+  id: '/sign-up',
   path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => authRouteRoute,
 } as any)
 const authSignInRoute = authSignInRouteImport.update({
-  id: '/(auth)/sign-in',
+  id: '/sign-in',
   path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => authRouteRoute,
 } as any)
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
-  id: '/(auth)/forgot-password',
+  id: '/forgot-password',
   path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => authRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -46,47 +98,115 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/dashboard': typeof dashboardDashboardRoute
+  '/clubs': typeof protectedClubsRoute
+  '/dashboard': typeof protectedDashboardRoute
+  '/friends': typeof protectedFriendsRoute
+  '/help': typeof protectedHelpRoute
+  '/ideas': typeof protectedIdeasRoute
+  '/match': typeof protectedMatchRoute
+  '/patch_notes': typeof protectedPatch_notesRoute
+  '/settings': typeof protectedSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/dashboard': typeof dashboardDashboardRoute
+  '/clubs': typeof protectedClubsRoute
+  '/dashboard': typeof protectedDashboardRoute
+  '/friends': typeof protectedFriendsRoute
+  '/help': typeof protectedHelpRoute
+  '/ideas': typeof protectedIdeasRoute
+  '/match': typeof protectedMatchRoute
+  '/patch_notes': typeof protectedPatch_notesRoute
+  '/settings': typeof protectedSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/(auth)': typeof authRouteRouteWithChildren
+  '/(protected)': typeof protectedRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
-  '/(dashboard)/dashboard': typeof dashboardDashboardRoute
+  '/(protected)/clubs': typeof protectedClubsRoute
+  '/(protected)/dashboard': typeof protectedDashboardRoute
+  '/(protected)/friends': typeof protectedFriendsRoute
+  '/(protected)/help': typeof protectedHelpRoute
+  '/(protected)/ideas': typeof protectedIdeasRoute
+  '/(protected)/match': typeof protectedMatchRoute
+  '/(protected)/patch_notes': typeof protectedPatch_notesRoute
+  '/(protected)/settings': typeof protectedSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/forgot-password'
+    | '/sign-in'
+    | '/sign-up'
+    | '/clubs'
+    | '/dashboard'
+    | '/friends'
+    | '/help'
+    | '/ideas'
+    | '/match'
+    | '/patch_notes'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/sign-in' | '/sign-up' | '/dashboard'
+  to:
+    | '/'
+    | '/forgot-password'
+    | '/sign-in'
+    | '/sign-up'
+    | '/clubs'
+    | '/dashboard'
+    | '/friends'
+    | '/help'
+    | '/ideas'
+    | '/match'
+    | '/patch_notes'
+    | '/settings'
   id:
     | '__root__'
     | '/'
+    | '/(auth)'
+    | '/(protected)'
     | '/(auth)/forgot-password'
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
-    | '/(dashboard)/dashboard'
+    | '/(protected)/clubs'
+    | '/(protected)/dashboard'
+    | '/(protected)/friends'
+    | '/(protected)/help'
+    | '/(protected)/ideas'
+    | '/(protected)/match'
+    | '/(protected)/patch_notes'
+    | '/(protected)/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  authForgotPasswordRoute: typeof authForgotPasswordRoute
-  authSignInRoute: typeof authSignInRoute
-  authSignUpRoute: typeof authSignUpRoute
-  dashboardDashboardRoute: typeof dashboardDashboardRoute
+  authRouteRoute: typeof authRouteRouteWithChildren
+  protectedRouteRoute: typeof protectedRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/(protected)': {
+      id: '/(protected)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof protectedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)': {
+      id: '/(auth)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof authRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -94,43 +214,132 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(dashboard)/dashboard': {
-      id: '/(dashboard)/dashboard'
+    '/(protected)/settings': {
+      id: '/(protected)/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof protectedSettingsRouteImport
+      parentRoute: typeof protectedRouteRoute
+    }
+    '/(protected)/patch_notes': {
+      id: '/(protected)/patch_notes'
+      path: '/patch_notes'
+      fullPath: '/patch_notes'
+      preLoaderRoute: typeof protectedPatch_notesRouteImport
+      parentRoute: typeof protectedRouteRoute
+    }
+    '/(protected)/match': {
+      id: '/(protected)/match'
+      path: '/match'
+      fullPath: '/match'
+      preLoaderRoute: typeof protectedMatchRouteImport
+      parentRoute: typeof protectedRouteRoute
+    }
+    '/(protected)/ideas': {
+      id: '/(protected)/ideas'
+      path: '/ideas'
+      fullPath: '/ideas'
+      preLoaderRoute: typeof protectedIdeasRouteImport
+      parentRoute: typeof protectedRouteRoute
+    }
+    '/(protected)/help': {
+      id: '/(protected)/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof protectedHelpRouteImport
+      parentRoute: typeof protectedRouteRoute
+    }
+    '/(protected)/friends': {
+      id: '/(protected)/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof protectedFriendsRouteImport
+      parentRoute: typeof protectedRouteRoute
+    }
+    '/(protected)/dashboard': {
+      id: '/(protected)/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof dashboardDashboardRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof protectedDashboardRouteImport
+      parentRoute: typeof protectedRouteRoute
+    }
+    '/(protected)/clubs': {
+      id: '/(protected)/clubs'
+      path: '/clubs'
+      fullPath: '/clubs'
+      preLoaderRoute: typeof protectedClubsRouteImport
+      parentRoute: typeof protectedRouteRoute
     }
     '/(auth)/sign-up': {
       id: '/(auth)/sign-up'
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof authSignUpRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof authRouteRoute
     }
     '/(auth)/sign-in': {
       id: '/(auth)/sign-in'
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof authSignInRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof authRouteRoute
     }
     '/(auth)/forgot-password': {
       id: '/(auth)/forgot-password'
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof authForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof authRouteRoute
     }
   }
 }
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+interface authRouteRouteChildren {
+  authForgotPasswordRoute: typeof authForgotPasswordRoute
+  authSignInRoute: typeof authSignInRoute
+  authSignUpRoute: typeof authSignUpRoute
+}
+
+const authRouteRouteChildren: authRouteRouteChildren = {
   authForgotPasswordRoute: authForgotPasswordRoute,
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,
-  dashboardDashboardRoute: dashboardDashboardRoute,
+}
+
+const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
+  authRouteRouteChildren,
+)
+
+interface protectedRouteRouteChildren {
+  protectedClubsRoute: typeof protectedClubsRoute
+  protectedDashboardRoute: typeof protectedDashboardRoute
+  protectedFriendsRoute: typeof protectedFriendsRoute
+  protectedHelpRoute: typeof protectedHelpRoute
+  protectedIdeasRoute: typeof protectedIdeasRoute
+  protectedMatchRoute: typeof protectedMatchRoute
+  protectedPatch_notesRoute: typeof protectedPatch_notesRoute
+  protectedSettingsRoute: typeof protectedSettingsRoute
+}
+
+const protectedRouteRouteChildren: protectedRouteRouteChildren = {
+  protectedClubsRoute: protectedClubsRoute,
+  protectedDashboardRoute: protectedDashboardRoute,
+  protectedFriendsRoute: protectedFriendsRoute,
+  protectedHelpRoute: protectedHelpRoute,
+  protectedIdeasRoute: protectedIdeasRoute,
+  protectedMatchRoute: protectedMatchRoute,
+  protectedPatch_notesRoute: protectedPatch_notesRoute,
+  protectedSettingsRoute: protectedSettingsRoute,
+}
+
+const protectedRouteRouteWithChildren = protectedRouteRoute._addFileChildren(
+  protectedRouteRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  authRouteRoute: authRouteRouteWithChildren,
+  protectedRouteRoute: protectedRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

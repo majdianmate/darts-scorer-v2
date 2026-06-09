@@ -64,8 +64,12 @@ function GravityStarsBackground({
   const readColor = React.useCallback(() => {
     const el = containerRef.current;
     if (!el) return '#ffffff';
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '#ffffff';
     const cs = getComputedStyle(el);
-    return cs.color || '#ffffff';
+    ctx.fillStyle = cs.color || '#ffffff';
+    return ctx.fillStyle;
   }, []);
 
   const initStars = React.useCallback(

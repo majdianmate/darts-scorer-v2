@@ -1,69 +1,51 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { toast } from "sonner";
 
 import {
   deleteAccountService,
-  getOrCreateUserData,
   loginWithEmailService,
   loginWithGoogleService,
   logoutService,
   registerWithEmailService,
   resetPasswordService,
-  subscribeToAuthChanges,
 } from "../services/user-service";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { useAuthReady } from "@/components/auth-provider";
+import {
+  fetchAuthUser,
+  getUserQueryOptions,
+  USER_QUERY_KEY,
+} from "@/lib/auth";
 import type { AuthCredentials, User } from "../types/user-types";
-
-const USER_QUERY_KEY = ["user"] as const;
-
-// Az auth listener-t csak egyszer szeretnénk regisztrálni az app életciklusában,
-// függetlenül attól, hogy hány komponens használja a useUser hookot.
-let authListenerRegistered = false;
 
 export const useUser = () => {
   const queryClient = useQueryClient();
+  const isAuthReady = useAuthReady();
 
-  // Folyamatos auth state subscribe — frissíti a query cache-t.
-  useEffect(() => {
-    if (authListenerRegistered) return;
-    authListenerRegistered = true;
+  const userQuery = useQuery(getUserQueryOptions());
 
-    subscribeToAuthChanges((user) => {
-      queryClient.setQueryData<User | null>(USER_QUERY_KEY, user);
-    });
-  }, [queryClient]);
+  const user = userQuery.data ?? null;
+  const isUserLoading =
+    !isAuthReady || userQuery.isLoading || userQuery.isFetching;
+  const isAuthenticated = isAuthReady && user !== null;
 
-  const userQuery = useQuery<User | null>({
-    queryKey: USER_QUERY_KEY,
-    // Az első auth callback-ig várunk; a folyamatos frissítést a fenti effect intézi.
-    queryFn: () =>
-      new Promise<User | null>((resolve) => {
-        const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-          unsub();
-          if (!firebaseUser) {
-            resolve(null);
-            return;
-          }
-          const userData = await getOrCreateUserData(firebaseUser);
-          resolve(userData);
-        });
-      }),
-    staleTime: Infinity,
-    gcTime: Infinity,
-    retry: false,
-  });
+  const syncUserCache = async () => {
+    const userData = await fetchAuthUser();
+    queryClient.setQueryData<User | null>(USER_QUERY_KEY, userData);
+    return userData;
+  };
 
   const loginWithGoogle = useMutation({
     mutationFn: loginWithGoogleService,
-    onSuccess: () => toast.success("Successfully logged in!"),
+    onSuccess: async () => {
+      await syncUserCache();
+      toast.success("Successfully logged in!");
+    },
     onError: (error: Error) =>
       toast.error("Google login error: " + error.message),
   });
 
   const registerWithEmail = useMutation({
-    mutationFn: (params: AuthCredentials & { name: string }) =>
+    mutationFn: (params: AuthCredentials & { name: string; displayName: string }) =>
       registerWithEmailService(params),
     onSuccess: (newUser) => {
       queryClient.setQueryData<User | null>(USER_QUERY_KEY, newUser);
@@ -75,7 +57,10 @@ export const useUser = () => {
 
   const loginWithEmail = useMutation({
     mutationFn: (params: AuthCredentials) => loginWithEmailService(params),
-    onSuccess: () => toast.success("Successfully logged in!"),
+    onSuccess: async () => {
+      await syncUserCache();
+      toast.success("Successfully logged in!");
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -108,9 +93,10 @@ export const useUser = () => {
   });
 
   return {
-    user: userQuery.data ?? null,
-    isUserLoading: userQuery.isLoading,
+    user,
+    isUserLoading,
     isUserError: userQuery.isError,
+    isAuthenticated,
 
     loginWithGoogle: loginWithGoogle.mutateAsync,
     isLoginWithGoogleLoading: loginWithGoogle.isPending,

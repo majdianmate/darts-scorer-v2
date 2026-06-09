@@ -1,5 +1,6 @@
 import {
   HeadContent,
+  Outlet,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
@@ -7,11 +8,15 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import TanstackQueryProvider from '../integrations/tanstack-query/root-provider'
+import { Toaster } from '@/components/ui/sonner'
 
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
-import { GravityStarsBackground } from '#/components/animate-ui/components/backgrounds/gravity-stars'
+import { AuthProvider } from '@/components/auth-provider'
+import { GravityStarsLayer } from '@/components/layout/gravity-stars-layer'
+import { ThemeProvider } from '@/components/theme-provider'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -38,19 +43,37 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
+  component: RootComponent,
   shellComponent: RootDocument,
 })
 
+function RootComponent() {
+  const { queryClient } = Route.useRouteContext()
+
+  return (
+    <TanstackQueryProvider queryClient={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <AuthProvider>
+          <GravityStarsLayer />
+          <div className="relative z-[2] min-h-dvh">
+            <Outlet />
+          </div>
+          <Toaster />
+        </AuthProvider>
+      </ThemeProvider>
+    </TanstackQueryProvider>
+  )
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body className="bg-background flex justify-center items-center h-screen relative">
+      <body className="min-h-dvh relative bg-background text-foreground">
         {children}
-        <GravityStarsBackground className="absolute inset-0 -z-10000" />
-        <TanStackDevtools
+        {/*<TanStackDevtools
           config={{
             position: 'bottom-right',
           }}
@@ -62,6 +85,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             TanStackQueryDevtools,
           ]}
         />
+        */}
         <Scripts />
       </body>
     </html>

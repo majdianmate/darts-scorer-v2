@@ -1,27 +1,26 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, type Analytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCRbPyYoZMBzyP8eDX_hDJtkSJBOtkzRMg",
-  authDomain: "darts-scorer-e4297.firebaseapp.com",
-  projectId: "darts-scorer-e4297",
-  storageBucket: "darts-scorer-e4297.firebasestorage.app",
-  messagingSenderId: "44031262871",
-  appId: "1:44031262871:web:28367e99d96818d22b29d2",
-  measurementId: "G-HWX0JKHVXT"
+  apiKey: import.meta.env.FIREBASE_API_KEY,
+  authDomain: import.meta.env.FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.FIREBASE_APP_ID,
+  measurementId: import.meta.env.FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+let analytics: Analytics | null = null;
+
+if (typeof window !== "undefined") {
+  analytics = getAnalytics(app);
+}
 
 export { app, analytics, auth, db };
