@@ -1,4 +1,9 @@
 import { File, HelpCircle, HomeIcon, Lightbulb, Settings, Target, Users, type LucideIcon } from "lucide-react";
+import { useUser } from "../../../hooks/use-user";
+import { useFriends } from "../../../hooks/use-friends";
+const { user } = useUser();
+const userId = user?.id ?? '';
+const { pendingRequests} = useFriends(userId);
 
 export interface SidebarMenuItem {
     label: string;
@@ -25,6 +30,7 @@ export const SidebarMenuItems: SidebarMenuItem[] = [
         label: 'Friends',
         icon: Users,
         href: '/friends',
+        badge: pendingRequests.length.toString(),
         render: true,
     },
     {

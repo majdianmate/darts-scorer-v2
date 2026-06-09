@@ -1,8 +1,11 @@
 import { useState } from "react";
 import {
+  acceptFriendRequestService,
     createFriendshipsServices,
     deleteFriendshipService,
     getFriendsService,
+    getIncomingFriendRequestsService,
+    rejectFriendRequestService,
   } from "../services/friends-service";
   import { type FriendshipDoc } from "../types/friends-types";
   import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,7 +28,7 @@ import {
           queryClient.invalidateQueries({ queryKey: ["get-friends"] });
           queryClient.invalidateQueries({ queryKey: ["get-pending-requests"] });
           queryClient.invalidateQueries({ queryKey: ["get-blocked-friends"] });
-          
+
           toast.success("Friends added successfully!");
         },
         onError: (error) => {
@@ -51,16 +54,54 @@ import {
           setDeletingFriendshipId(null);
         },
       });
+
+      const getPendingRequests = useQuery({
+        queryKey: ["get-pending-requests", userId],
+        queryFn: () => getIncomingFriendRequestsService(userId),
+        enabled: !!userId,
+      });
+
+      const acceptFriendRequest = useMutation({
+        mutationFn: (friendshipId: string) =>
+          acceptFriendRequestService(friendshipId),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["get-pending-requests"] });
+          queryClient.invalidateQueries({ queryKey: ["get-friends"] });
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+      });
+    
+      const rejectFriendRequest = useMutation({
+        mutationFn: (friendshipId: string) =>
+          rejectFriendRequestService(friendshipId),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["get-pending-requests"] });
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+      });
+    
   
     return {
       friends: getFriends.data ?? [],
       isGetFriendsLoading: getFriends.isLoading,
       isGetFriendsError: getFriends.isError,
       isGetFriendsSuccess: getFriends.isSuccess,
+
+      pendingRequests: getPendingRequests.data ?? [],
+      isGetPendingRequestsLoading: getPendingRequests.isLoading,
+      isGetPendingRequestsError: getPendingRequests.isError,
+      isGetPendingRequestsSuccess: getPendingRequests.isSuccess,
   
       addFriends: addFriends.mutate,
   
       deleteFriend: deleteFriendMutation.mutate,
       deletingFriendshipId: deletingFriendshipId,
+
+      acceptFriendRequest: acceptFriendRequest.mutate,
+      rejectFriendRequest: rejectFriendRequest.mutate,
     };
   };
