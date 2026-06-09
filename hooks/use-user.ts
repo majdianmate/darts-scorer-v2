@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import {
   deleteAccountService,
   getOrCreateUserData,
+  updateUserProfileService,
+  uploadProfileImageService,
   loginWithEmailService,
   loginWithGoogleService,
   logoutService,
@@ -94,6 +96,34 @@ export const useUser = () => {
     onError: (error: Error) => toast.error("Error: " + error.message),
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async (params: {
+      displayName?: string;
+      imageFile?: File;
+    }) => {
+      const currentUser = queryClient.getQueryData<User | null>(USER_QUERY_KEY);
+      if (!currentUser) throw new Error("Not authenticated");
+
+      let imageUrl: string | undefined;
+      if (params.imageFile) {
+        imageUrl = await uploadProfileImageService(
+          currentUser.id,
+          params.imageFile,
+        );
+      }
+
+      return updateUserProfileService(currentUser.id, {
+        displayName: params.displayName,
+        image: imageUrl,
+      });
+    },
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData<User | null>(USER_QUERY_KEY, updatedUser);
+      toast.success("Profile updated.");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const deleteAccount = useMutation({
     mutationFn: deleteAccountService,
     onSuccess: () => {
@@ -129,5 +159,9 @@ export const useUser = () => {
 
     deleteAccount: deleteAccount.mutateAsync,
     isDeleteAccountLoading: deleteAccount.isPending,
+
+    updateProfile: updateProfileMutation.mutate,
+    updateProfileAsync: updateProfileMutation.mutateAsync,
+    isUpdateProfilePending: updateProfileMutation.isPending,
   };
 };

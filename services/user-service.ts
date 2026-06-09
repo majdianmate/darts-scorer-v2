@@ -21,8 +21,10 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateProfile,
   type User as FirebaseUser,
 } from "firebase/auth";
+import { isRemoteProfileImageUrl, prepareProfileImage } from "./profile-image";
 
 export const getUserData = async (userId: string) => {
     const userRef = doc(db, "users", userId);
@@ -113,6 +115,81 @@ export const resetPasswordService = async (email: string): Promise<void> => {
 export const logoutService = async (): Promise<void> => {
   await signOut(auth);
 };
+
+const PROFILE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const PROFILE_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+export function validateProfileImage(file: File) {
+  if (!PROFILE_IMAGE_TYPES.has(file.type)) {
+    throw new Error("Please choose a JPG, PNG, or WebP image.");
+  }
+
+  if (file.size > PROFILE_IMAGE_MAX_BYTES) {
+    throw new Error("Image must be 5 MB or smaller.");
+  }
+}
+
+export async function uploadProfileImageService(
+  _userId: string,
+  file: File,
+): Promise<string> {
+  validateProfileImage(file);
+  const { dataUrl } = await prepareProfileImage(file);
+  return dataUrl;
+}
+
+export async function updateUserProfileService(
+  userId: string,
+  data: { displayName?: string; image?: string },
+): Promise<User> {
+  const firebaseUser = auth.currentUser;
+  if (!firebaseUser || firebaseUser.uid !== userId) {
+    throw new Error("Not authenticated");
+  }
+
+  const trimmedDisplayName = data.displayName?.trim();
+  if (data.displayName !== undefined && !trimmedDisplayName) {
+    throw new Error("Display name is required.");
+  }
+
+  const firestoreUpdates: Record<string, unknown> = {
+    updatedAt: serverTimestamp(),
+  };
+
+  if (trimmedDisplayName !== undefined) {
+    firestoreUpdates.displayName = trimmedDisplayName;
+    firestoreUpdates.name = trimmedDisplayName;
+  }
+
+  if (data.image !== undefined) {
+    firestoreUpdates.image = data.image;
+  }
+
+  await setDoc(doc(db, "users", userId), firestoreUpdates, { merge: true });
+
+  const authUpdates: { displayName?: string; photoURL?: string } = {};
+  if (trimmedDisplayName !== undefined) {
+    authUpdates.displayName = trimmedDisplayName;
+  }
+  if (data.image !== undefined && isRemoteProfileImageUrl(data.image)) {
+    authUpdates.photoURL = data.image;
+  }
+
+  if (Object.keys(authUpdates).length > 0) {
+    await updateProfile(firebaseUser, authUpdates);
+  }
+
+  const userSnap = await getDoc(doc(db, "users", userId));
+  if (!userSnap.exists()) {
+    throw new Error("User not found.");
+  }
+
+  return { id: userSnap.id, ...userSnap.data() } as User;
+}
 
 export const deleteAccountService = async (): Promise<void> => {
   const firebaseUser = auth.currentUser;

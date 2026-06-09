@@ -1,5 +1,4 @@
-import { type User } from "../../types/user-types";
-import React, { type FC, useState } from "react";
+import { type FC } from "react";
 
 export interface AvatarProps {
   name: string;
@@ -9,8 +8,6 @@ export interface AvatarProps {
 }
 
 const Avatar: FC<AvatarProps> = ({ name, image, size = "md", className = "" }) => {
-  console.log(image);
-  // Méretek definiálása
   const sizeClasses = {
     xs: "h-5 w-5 text-[9px]",
     sm: "h-6 w-6 text-[10px]",
