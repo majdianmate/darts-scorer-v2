@@ -27,17 +27,25 @@ const SignUp = () => {
     if (isSubmitting) return
     setIsSubmitting(true)
     try {
-      await signUpWithCredentials({ name, displayName, email, password, passwordAgain: confirmPassword })
+      await signUpWithCredentials({
+        name,
+        displayName,
+        email,
+        password,
+        passwordAgain: confirmPassword,
+      })
       navigate({ href: redirectTo })
     } catch {
       toast.error('Failed to sign up')
     } finally {
-      setIsSubmitting(false)  // <-- ez hiányzott
+      setIsSubmitting(false) // <-- ez hiányzott
     }
   }
 
   useEffect(() => {
-    
+    if (user) {
+      navigate({ href: redirectTo })
+    }
   }, [user, navigate])
 
   const handleGoogleSignup = async () => {
