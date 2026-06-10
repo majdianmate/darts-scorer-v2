@@ -1,16 +1,18 @@
 import {
   HeadContent,
+  Outlet,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
-
 import appCss from '../styles.css?url'
-
+import { Toaster } from 'sonner'
 import type { QueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { useStore } from '../../store/store'
+import { initAuthSync } from '#/features/authentication/service/auth-service'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -19,26 +21,30 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
     meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'TanStack Start Starter',
-      },
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'TanStack Start Starter' },
     ],
-    links: [
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
-    ],
+    links: [{ rel: 'stylesheet', href: appCss }],
   }),
+  component: RootComponent,
   shellComponent: RootDocument,
 })
+
+function RootComponent() {
+  const setUser = useStore((state) => state.setUser)
+  const clearUser = useStore((state) => state.clearUser)
+
+  useEffect(() => {
+    const unsub = initAuthSync((user) => {
+      if (user) setUser(user)
+      else clearUser()
+    })
+    return () => unsub()
+  }, [])
+
+  return <Outlet />
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -47,16 +53,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <Toaster />
         {children}
         <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
+          config={{ position: 'bottom-right' }}
           plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
+            { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
             TanStackQueryDevtools,
           ]}
         />
