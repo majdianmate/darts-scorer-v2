@@ -34,7 +34,7 @@ function ProtectedLayout() {
             )}
           >
             <GravityStarsBackground className="absolute inset-0 z-0" />
-            <div className="relative z-10">
+            <div className="relative z-10 p-4">
               <Outlet />
             </div>
           </main>

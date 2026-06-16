@@ -3,8 +3,9 @@ import { createAuthenticationSlice, type AuthenticationSlice } from "#/features/
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { createUiSlice, type UiSlice } from "./ui-store";
+import { createFriendSlice, type FriendSlice } from "#/features/friends/store/friend-store";
 
-export type StoreProps = AuthenticationSlice & UiSlice;
+export type StoreProps = AuthenticationSlice & UiSlice & FriendSlice;
 
 // ─── Store ────────────────────────────────────────────────────
 export const useStore = create<StoreProps>()(
@@ -12,6 +13,7 @@ export const useStore = create<StoreProps>()(
     (...a) => ({
       ...createAuthenticationSlice(...a),
       ...createUiSlice(...a),
+      ...createFriendSlice(...a),
     }),
     { name: "AppStore" }
   )

@@ -1,3 +1,4 @@
+import Friends from '#/features/friends/friends'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_protected/friends')({
@@ -5,5 +6,7 @@ export const Route = createFileRoute('/_protected/friends')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/_protected/friends"!</div>
+  return <div>
+    <Friends />
+  </div>
 }

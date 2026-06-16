@@ -53,6 +53,14 @@ export const getOrCreateUserData = async (firebaseUser: FirebaseUser): Promise<U
     })
   }
 
+
+export const getUserData = async (userId: string): Promise<User> => {
+  const docRef = doc(db, 'users', userId)
+  const docSnap = await getDoc(docRef)
+  if (!docSnap.exists()) throw new Error('User not found')
+  return docSnap.data() as User
+}
+
 export const signUpWithCredentials = async (
   signUpCredentials: AuthSignUpCredentials,
 ): Promise<User> => {
