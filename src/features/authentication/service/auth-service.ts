@@ -25,33 +25,58 @@ import type {
   ResetPasswordCredentials,
 } from '../types/auth-types'
 
-export const getOrCreateUserData = async (firebaseUser: FirebaseUser): Promise<User> => {
-    const docRef = doc(db, 'users', firebaseUser.uid)
-    const docSnap = await getDoc(docRef)
-  
-    if (docSnap.exists()) return docSnap.data() as User
-  
-    const newUser: User = {
-      id: firebaseUser.uid,
-      name: firebaseUser.displayName || 'Google User',
-      displayName: firebaseUser.displayName || 'Google User',
-      email: firebaseUser.email || '',
-      image: firebaseUser.photoURL || '',
-      username: firebaseUser.email?.split('@')[0] ?? firebaseUser.uid,
-      createdAt: serverTimestamp() as any,
-      updatedAt: serverTimestamp() as any,
-    }
-    await setDoc(docRef, newUser)
-    return newUser
-  }
+export const getOrCreateUserData = async (
+  firebaseUser: FirebaseUser,
+): Promise<User> => {
+  const docRef = doc(db, 'users', firebaseUser.uid)
+  const docSnap = await getDoc(docRef)
 
-  export const initAuthSync = (setUser: (user: User | null) => void) => {
-    return onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) { setUser(null); return }
-      const userData = await getOrCreateUserData(firebaseUser)
-      setUser(userData)
-    })
+  if (docSnap.exists()) return docSnap.data() as User
+
+  const newUser: User = {
+    id: firebaseUser.uid,
+    name: firebaseUser.displayName || 'Google User',
+    displayName: firebaseUser.displayName || 'Google User',
+    email: firebaseUser.email || '',
+    image: firebaseUser.photoURL || '',
+    username: firebaseUser.email?.split('@')[0] ?? firebaseUser.uid,
+    createdAt: serverTimestamp() as any,
+    updatedAt: serverTimestamp() as any,
   }
+  await setDoc(docRef, newUser)
+  return newUser
+}
+
+export const initAuthSync = (setUser: (user: User | null) => void) => {
+  return onAuthStateChanged(auth, async (firebaseUser) => {
+    if (!firebaseUser) {
+      setUser(null)
+      return
+    }
+    const userData = await getOrCreateUserData(firebaseUser)
+    setUser(userData)
+  })
+}
+
+export const getAuthenticatedUser = async (): Promise<User | null> => {
+  const firebaseUser = await new Promise<FirebaseUser | null>(
+    (resolve, reject) => {
+      let unsubscribe = () => {}
+      unsubscribe = onAuthStateChanged(
+        auth,
+        (user) => {
+          unsubscribe()
+          resolve(user)
+        },
+        reject,
+      )
+    },
+  )
+
+  if (!firebaseUser) return null
+
+  return getOrCreateUserData(firebaseUser)
+}
 
 export const getAuthenticatedUser = async (): Promise<User | null> => {
   const firebaseUser = await new Promise<FirebaseUser | null>((resolve, reject) => {
@@ -126,44 +151,44 @@ export const signInWithCredentials = async (
 }
 
 export const signInOrSignUpWithGoogle = async (): Promise<User> => {
-    const provider = new GoogleAuthProvider()
-    provider.setCustomParameters({ prompt: 'select_account' })
-    const result = await signInWithPopup(auth, provider)
-    return getOrCreateUserData(result.user)
+  const provider = new GoogleAuthProvider()
+  provider.setCustomParameters({ prompt: 'select_account' })
+  const result = await signInWithPopup(auth, provider)
+  return getOrCreateUserData(result.user)
 }
 
 export const handleGoogleRedirectResult = async (): Promise<User | null> => {
-    const result = await getRedirectResult(auth)
-    console.log('getRedirectResult result:', result)
-    
-    if (!result) return null
-  
-    const firebaseUser = result.user
-    console.log('firebaseUser:', firebaseUser.uid, firebaseUser.email)
-    
-    const docRef = doc(db, 'users', firebaseUser.uid)
-    const docSnap = await getDoc(docRef)
-    console.log('docSnap exists:', docSnap.exists())
-  
-    if (!docSnap.exists()) {
-      const newUser: User = {
-        id: firebaseUser.uid,
-        name: firebaseUser.displayName || 'Google User',
-        displayName: firebaseUser.displayName || 'Google User',
-        email: firebaseUser.email || '',
-        image: firebaseUser.photoURL || '',
-        username: firebaseUser.email?.split('@')[0] ?? firebaseUser.uid,
-        createdAt: serverTimestamp() as any,
-        updatedAt: serverTimestamp() as any,
-      }
-      console.log('Writing new user to Firestore:', newUser)
-      await setDoc(docRef, newUser)
-      console.log('Firestore write done')
-      return newUser
+  const result = await getRedirectResult(auth)
+  console.log('getRedirectResult result:', result)
+
+  if (!result) return null
+
+  const firebaseUser = result.user
+  console.log('firebaseUser:', firebaseUser.uid, firebaseUser.email)
+
+  const docRef = doc(db, 'users', firebaseUser.uid)
+  const docSnap = await getDoc(docRef)
+  console.log('docSnap exists:', docSnap.exists())
+
+  if (!docSnap.exists()) {
+    const newUser: User = {
+      id: firebaseUser.uid,
+      name: firebaseUser.displayName || 'Google User',
+      displayName: firebaseUser.displayName || 'Google User',
+      email: firebaseUser.email || '',
+      image: firebaseUser.photoURL || '',
+      username: firebaseUser.email?.split('@')[0] ?? firebaseUser.uid,
+      createdAt: serverTimestamp() as any,
+      updatedAt: serverTimestamp() as any,
     }
-  
-    return docSnap.data() as User
+    console.log('Writing new user to Firestore:', newUser)
+    await setDoc(docRef, newUser)
+    console.log('Firestore write done')
+    return newUser
   }
+
+  return docSnap.data() as User
+}
 
 export const resetPasswordService = async (
   resetPasswordCredentials: ResetPasswordCredentials,
