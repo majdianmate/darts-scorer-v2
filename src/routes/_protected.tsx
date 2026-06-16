@@ -4,14 +4,24 @@ import { useStore } from '../../store/store'
 import Header from '#/components/Header/Header'
 import { GravityStarsBackground } from '#/components/animate-ui/components/backgrounds/gravity-stars'
 import { cn } from '#/lib/utils'
+import { getAuthenticatedUser } from '#/features/authentication/service/auth-service'
 
 export const Route = createFileRoute('/_protected')({
-  beforeLoad: ({ context }) => {
+  beforeLoad: async ({ context }) => {
     const user =
       context.queryClient.getQueryData(['user']) ?? useStore.getState().user
-    if (!user) {
+
+    if (user) return
+    if (typeof window === 'undefined') return
+
+    const authenticatedUser = await getAuthenticatedUser()
+
+    if (!authenticatedUser) {
       throw redirect({ to: '/sign-in' })
     }
+
+    useStore.getState().setUser(authenticatedUser)
+    context.queryClient.setQueryData(['user'], authenticatedUser)
   },
   component: ProtectedLayout,
 })
