@@ -21,6 +21,7 @@ import {
 
 import { db } from '@/lib/firebase'
 import { getUserData } from '#/features/authentication/service/auth-service'
+import type { User } from '#/features/authentication/types/user-types'
 
 //? ─── CRUD ────────────────────────────────────────────────────
 //? ─── Add Friends ────────────────────────────────────────────────────
@@ -80,10 +81,11 @@ export const getFriendsService = async (
     friendships.map(async (friendship) => {
       const sender = await getUserData(friendship.senderId)
       const receiver = await getUserData(friendship.receiverId)
+
+      const friend = sender.id === userId ? receiver : (sender as User)
       return {
         ...friendship,
-        sender,
-        receiver,
+        friend,
       }
     }),
   )
@@ -170,10 +172,11 @@ export const getFriendRequestsService = async (
     friendships.map(async (friendship) => {
       const sender = await getUserData(friendship.senderId)
       const receiver = await getUserData(friendship.receiverId)
+
+      const friend = sender.id === userId ? receiver : (sender as User)
       return {
         ...friendship,
-        sender,
-        receiver,
+        friend,
       }
     }),
   )
@@ -201,10 +204,10 @@ export const getSentFriendRequestsService = async (
     friendships.map(async (friendship) => {
       const sender = await getUserData(friendship.senderId)
       const receiver = await getUserData(friendship.receiverId)
+      const friend = sender.id === userId ? receiver : (sender as User)
       return {
         ...friendship,
-        sender,
-        receiver,
+        friend,
       }
     }),
   )
@@ -212,12 +215,18 @@ export const getSentFriendRequestsService = async (
 }
 
 //? ─── Block Friend ────────────────────────────────────────────────────
-export const blockFriendService = async (friendshipId: string, currentUserId: string) => {
+export const blockFriendService = async (
+  friendshipId: string,
+  currentUserId: string,
+) => {
   const friendshipRef = doc(db, 'friendships', friendshipId)
   const friendship = await getDoc(friendshipRef)
   if (!friendship.exists()) throw new Error('Friendship not found')
   const friendshipData = friendship.data() as FriendshipDoc
-  if (friendshipData.senderId !== currentUserId && friendshipData.receiverId !== currentUserId)
+  if (
+    friendshipData.senderId !== currentUserId &&
+    friendshipData.receiverId !== currentUserId
+  )
     throw new Error('You are not a part of this friendship')
   await updateDoc(friendshipRef, {
     status: FriendshipStatus.BLOCKED,
@@ -227,12 +236,17 @@ export const blockFriendService = async (friendshipId: string, currentUserId: st
 }
 
 //? ─── Unblock Friend ────────────────────────────────────────────────────
-export const unblockFriendService = async (friendshipId: string, currentUserId: string) => {
-  await deleteFriendService(friendshipId, currentUserId);
+export const unblockFriendService = async (
+  friendshipId: string,
+  currentUserId: string,
+) => {
+  await deleteFriendService(friendshipId, currentUserId)
 }
 
 //? ─── Get Blocked Friends ────────────────────────────────────────────────────
-export const getBlockedFriendsService = async (userId: string): Promise<Friendship[]> => {
+export const getBlockedFriendsService = async (
+  userId: string,
+): Promise<Friendship[]> => {
   const friendshipsRef = collection(db, 'friendships')
   const q = query(
     friendshipsRef,
@@ -250,10 +264,10 @@ export const getBlockedFriendsService = async (userId: string): Promise<Friendsh
     friendships.map(async (friendship) => {
       const sender = await getUserData(friendship.senderId)
       const receiver = await getUserData(friendship.receiverId)
+      const friend = sender.id === userId ? receiver : (sender as User)
       return {
         ...friendship,
-        sender,
-        receiver,
+        friend,
       }
     }),
   )

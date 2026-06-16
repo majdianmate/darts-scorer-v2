@@ -19,8 +19,7 @@ export interface FriendshipDoc {
 
 export interface Friendship extends FriendshipDoc {
   id: string;
-  sender: User;
-  receiver: User;
+  friend: User;
 }
 
 export interface Friend {
