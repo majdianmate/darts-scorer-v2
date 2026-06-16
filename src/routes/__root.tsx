@@ -13,6 +13,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useStore } from '../../store/store'
 import { initAuthSync } from '#/features/authentication/service/auth-service'
+import { ThemeProvider } from '../../providers/theme-provider'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -43,22 +44,32 @@ function RootComponent() {
     return () => unsub()
   }, [])
 
-  return <Outlet />
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <div className="relative z-[2] min-h-dvh w-full">
+        <Outlet />
+      </div>
+      <Toaster />
+    </ThemeProvider>
+  )
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="h-screen w-screen overflow-hidden">
         <Toaster />
         {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
           plugins={[
-            { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
+            {
+              name: 'Tanstack Router',
+              render: <TanStackRouterDevtoolsPanel />,
+            },
             TanStackQueryDevtools,
           ]}
         />

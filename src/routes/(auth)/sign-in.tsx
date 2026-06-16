@@ -9,7 +9,7 @@ export const Route = createFileRoute('/(auth)/sign-in')({ // <-- KÖTELEZŐ A Z�
 
 function SignInPage() {
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-screen w-screen">
       <SignIn />
     </div>
   )

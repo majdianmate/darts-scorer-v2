@@ -1,5 +1,5 @@
 import { useAuthentication } from '../hooks/use-authentication';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import React, { type JSX, type SVGProps, useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ const SignIn = () => {
     setIsSubmitting(true);
     try {
       await signInWithCredentials({ email, password });
-      navigate({ href: redirectTo });
+      navigate({ to: redirectTo });
     } catch {
     } finally {
       setIsSubmitting(false);
@@ -33,7 +33,7 @@ const SignIn = () => {
 
   useEffect(() => {
     if (user) {
-      navigate({ href: redirectTo });
+      navigate({ to: redirectTo });
     }
   }, [user, navigate]);
 

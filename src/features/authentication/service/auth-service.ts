@@ -1,14 +1,10 @@
 import { auth, db } from '@/lib/firebase'
 import {
-  collection,
   deleteDoc,
   doc,
   getDoc,
-  getDocs,
-  query,
   serverTimestamp,
   setDoc,
-  where,
 } from 'firebase/firestore'
 import {
   createUserWithEmailAndPassword,
@@ -19,7 +15,6 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signInWithRedirect,
   signOut,
   type User as FirebaseUser,
 } from 'firebase/auth'
@@ -104,10 +99,11 @@ export const signInWithCredentials = async (
   return user
 }
 
-export const signInOrSignUpWithGoogle = async (): Promise<void> => {
+export const signInOrSignUpWithGoogle = async (): Promise<User> => {
     const provider = new GoogleAuthProvider()
     provider.setCustomParameters({ prompt: 'select_account' })
-    await signInWithPopup(auth, provider)
+    const result = await signInWithPopup(auth, provider)
+    return getOrCreateUserData(result.user)
 }
 
 export const handleGoogleRedirectResult = async (): Promise<User | null> => {

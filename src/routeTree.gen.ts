@@ -9,15 +9,68 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
+import { Route as ProtectedPatch_notesRouteImport } from './routes/_protected/patch_notes'
+import { Route as ProtectedMatchRouteImport } from './routes/_protected/match'
+import { Route as ProtectedHelpRouteImport } from './routes/_protected/help'
+import { Route as ProtectedFriendsRouteImport } from './routes/_protected/friends'
+import { Route as ProtectedFeedbackRouteImport } from './routes/_protected/feedback'
+import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
+import { Route as ProtectedClubsRouteImport } from './routes/_protected/clubs'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 
+const ProtectedRoute = ProtectedRouteImport.update({
+  id: '/_protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedPatch_notesRoute = ProtectedPatch_notesRouteImport.update({
+  id: '/patch_notes',
+  path: '/patch_notes',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedMatchRoute = ProtectedMatchRouteImport.update({
+  id: '/match',
+  path: '/match',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedHelpRoute = ProtectedHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedFriendsRoute = ProtectedFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedFeedbackRoute = ProtectedFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedClubsRoute = ProtectedClubsRouteImport.update({
+  id: '/clubs',
+  path: '/clubs',
+  getParentRoute: () => ProtectedRoute,
 } as any)
 const authSignUpRoute = authSignUpRouteImport.update({
   id: '/(auth)/sign-up',
@@ -40,35 +93,94 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
+  '/clubs': typeof ProtectedClubsRoute
+  '/dashboard': typeof ProtectedDashboardRoute
+  '/feedback': typeof ProtectedFeedbackRoute
+  '/friends': typeof ProtectedFriendsRoute
+  '/help': typeof ProtectedHelpRoute
+  '/match': typeof ProtectedMatchRoute
+  '/patch_notes': typeof ProtectedPatch_notesRoute
+  '/settings': typeof ProtectedSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
+  '/clubs': typeof ProtectedClubsRoute
+  '/dashboard': typeof ProtectedDashboardRoute
+  '/feedback': typeof ProtectedFeedbackRoute
+  '/friends': typeof ProtectedFriendsRoute
+  '/help': typeof ProtectedHelpRoute
+  '/match': typeof ProtectedMatchRoute
+  '/patch_notes': typeof ProtectedPatch_notesRoute
+  '/settings': typeof ProtectedSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_protected': typeof ProtectedRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
+  '/_protected/clubs': typeof ProtectedClubsRoute
+  '/_protected/dashboard': typeof ProtectedDashboardRoute
+  '/_protected/feedback': typeof ProtectedFeedbackRoute
+  '/_protected/friends': typeof ProtectedFriendsRoute
+  '/_protected/help': typeof ProtectedHelpRoute
+  '/_protected/match': typeof ProtectedMatchRoute
+  '/_protected/patch_notes': typeof ProtectedPatch_notesRoute
+  '/_protected/settings': typeof ProtectedSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot-password' | '/sign-in' | '/sign-up'
+  fullPaths:
+    | '/'
+    | '/forgot-password'
+    | '/sign-in'
+    | '/sign-up'
+    | '/clubs'
+    | '/dashboard'
+    | '/feedback'
+    | '/friends'
+    | '/help'
+    | '/match'
+    | '/patch_notes'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/sign-in' | '/sign-up'
+  to:
+    | '/'
+    | '/forgot-password'
+    | '/sign-in'
+    | '/sign-up'
+    | '/clubs'
+    | '/dashboard'
+    | '/feedback'
+    | '/friends'
+    | '/help'
+    | '/match'
+    | '/patch_notes'
+    | '/settings'
   id:
     | '__root__'
     | '/'
+    | '/_protected'
     | '/(auth)/forgot-password'
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
+    | '/_protected/clubs'
+    | '/_protected/dashboard'
+    | '/_protected/feedback'
+    | '/_protected/friends'
+    | '/_protected/help'
+    | '/_protected/match'
+    | '/_protected/patch_notes'
+    | '/_protected/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ProtectedRoute: typeof ProtectedRouteWithChildren
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authSignInRoute: typeof authSignInRoute
   authSignUpRoute: typeof authSignUpRoute
@@ -76,12 +188,75 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_protected': {
+      id: '/_protected'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProtectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_protected/settings': {
+      id: '/_protected/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof ProtectedSettingsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/patch_notes': {
+      id: '/_protected/patch_notes'
+      path: '/patch_notes'
+      fullPath: '/patch_notes'
+      preLoaderRoute: typeof ProtectedPatch_notesRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/match': {
+      id: '/_protected/match'
+      path: '/match'
+      fullPath: '/match'
+      preLoaderRoute: typeof ProtectedMatchRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/help': {
+      id: '/_protected/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof ProtectedHelpRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/friends': {
+      id: '/_protected/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof ProtectedFriendsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/feedback': {
+      id: '/_protected/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof ProtectedFeedbackRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/dashboard': {
+      id: '/_protected/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof ProtectedDashboardRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/clubs': {
+      id: '/_protected/clubs'
+      path: '/clubs'
+      fullPath: '/clubs'
+      preLoaderRoute: typeof ProtectedClubsRouteImport
+      parentRoute: typeof ProtectedRoute
     }
     '/(auth)/sign-up': {
       id: '/(auth)/sign-up'
@@ -107,8 +282,35 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProtectedRouteChildren {
+  ProtectedClubsRoute: typeof ProtectedClubsRoute
+  ProtectedDashboardRoute: typeof ProtectedDashboardRoute
+  ProtectedFeedbackRoute: typeof ProtectedFeedbackRoute
+  ProtectedFriendsRoute: typeof ProtectedFriendsRoute
+  ProtectedHelpRoute: typeof ProtectedHelpRoute
+  ProtectedMatchRoute: typeof ProtectedMatchRoute
+  ProtectedPatch_notesRoute: typeof ProtectedPatch_notesRoute
+  ProtectedSettingsRoute: typeof ProtectedSettingsRoute
+}
+
+const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedClubsRoute: ProtectedClubsRoute,
+  ProtectedDashboardRoute: ProtectedDashboardRoute,
+  ProtectedFeedbackRoute: ProtectedFeedbackRoute,
+  ProtectedFriendsRoute: ProtectedFriendsRoute,
+  ProtectedHelpRoute: ProtectedHelpRoute,
+  ProtectedMatchRoute: ProtectedMatchRoute,
+  ProtectedPatch_notesRoute: ProtectedPatch_notesRoute,
+  ProtectedSettingsRoute: ProtectedSettingsRoute,
+}
+
+const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
+  ProtectedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProtectedRoute: ProtectedRouteWithChildren,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,

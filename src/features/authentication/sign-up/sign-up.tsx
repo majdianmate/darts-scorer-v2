@@ -1,5 +1,5 @@
 import { useAuthentication } from '../hooks/use-authentication'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import React, { type JSX, type SVGProps, useEffect, useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -34,7 +34,7 @@ const SignUp = () => {
         password,
         passwordAgain: confirmPassword,
       })
-      navigate({ href: redirectTo })
+      navigate({ to: redirectTo })
     } catch {
       toast.error('Failed to sign up')
     } finally {
@@ -44,14 +44,14 @@ const SignUp = () => {
 
   useEffect(() => {
     if (user) {
-      navigate({ href: redirectTo })
+      navigate({ to: redirectTo })
     }
   }, [user, navigate])
 
   const handleGoogleSignup = async () => {
     try {
       await signInOrSignUpWithGoogle() // redirect indul, ide nem tér vissza
-      navigate({ href: redirectTo })
+      navigate({ to: redirectTo })
     } catch {
       toast.error('Failed to sign up with Google')
     }

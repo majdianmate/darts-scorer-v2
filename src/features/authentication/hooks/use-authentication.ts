@@ -1,11 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useStore } from '../../../../store/store'
-import type {
-  AuthSignInCredentials,
-  AuthSignUpCredentials,
-  ResetPasswordCredentials,
-} from '../types/auth-types'
+import type { User } from '../types/user-types'
 import {
   signUpWithCredentials,
   signInWithCredentials,
@@ -22,10 +18,20 @@ export const useAuthentication = () => {
   const setUser = useStore((state) => state.setUser)
   const clearUser = useStore((state) => state.clearUser)
 
+  const syncUser = (user: User) => {
+    setUser(user)
+    queryClient.setQueryData(['user'], user)
+  }
+
+  const clearUserSession = () => {
+    clearUser()
+    queryClient.setQueryData(['user'], null)
+  }
+
   const signUpWithCredentialsMutation = useMutation({
     mutationFn: signUpWithCredentials,
     onSuccess: (user) => {
-      setUser(user)
+      syncUser(user)
       toast.success('Signed up successfully')
     },
     onError: () => {
@@ -36,7 +42,7 @@ export const useAuthentication = () => {
   const signInOrSignUpWithGoogleMutation = useMutation({
     mutationFn: signInOrSignUpWithGoogle,
     onSuccess: (user) => {
-      setUser(user)
+      syncUser(user)
       toast.success('Signed up with Google successfully')
     },
     onError: () => {
@@ -47,7 +53,7 @@ export const useAuthentication = () => {
   const signInWithCredentialsMutation = useMutation({
     mutationFn: signInWithCredentials,
     onSuccess: (user) => {
-      setUser(user)
+      syncUser(user)
       toast.success('Signed in successfully')
     },
     onError: () => {
@@ -58,7 +64,7 @@ export const useAuthentication = () => {
   const signOutMutation = useMutation({
     mutationFn: signOutService,
     onSuccess: () => {
-      clearUser()
+      clearUserSession()
       toast.success('Signed out successfully')
     },
     onError: () => {
@@ -79,8 +85,7 @@ export const useAuthentication = () => {
   const deleteAccountMutation = useMutation({
     mutationFn: deleteAccountService,
     onSuccess: () => {
-      clearUser()
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      clearUserSession()
       toast.success('Deleted account successfully')
     },
     onError: () => {
