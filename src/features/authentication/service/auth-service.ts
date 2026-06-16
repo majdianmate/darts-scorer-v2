@@ -16,8 +16,8 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  type User as FirebaseUser,
 } from 'firebase/auth'
+import type { User as FirebaseUser } from 'firebase/auth'
 import type { User } from '../types/user-types'
 import type {
   AuthSignInCredentials,
@@ -52,6 +52,24 @@ export const getOrCreateUserData = async (firebaseUser: FirebaseUser): Promise<U
       setUser(userData)
     })
   }
+
+export const getAuthenticatedUser = async (): Promise<User | null> => {
+  const firebaseUser = await new Promise<FirebaseUser | null>((resolve, reject) => {
+    let unsubscribe = () => {}
+    unsubscribe = onAuthStateChanged(
+      auth,
+      (user) => {
+        unsubscribe()
+        resolve(user)
+      },
+      reject,
+    )
+  })
+
+  if (!firebaseUser) return null
+
+  return getOrCreateUserData(firebaseUser)
+}
 
 
 export const getUserData = async (userId: string): Promise<User> => {
