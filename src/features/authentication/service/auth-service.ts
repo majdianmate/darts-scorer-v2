@@ -59,26 +59,6 @@ export const initAuthSync = (setUser: (user: User | null) => void) => {
 }
 
 export const getAuthenticatedUser = async (): Promise<User | null> => {
-  const firebaseUser = await new Promise<FirebaseUser | null>(
-    (resolve, reject) => {
-      let unsubscribe = () => {}
-      unsubscribe = onAuthStateChanged(
-        auth,
-        (user) => {
-          unsubscribe()
-          resolve(user)
-        },
-        reject,
-      )
-    },
-  )
-
-  if (!firebaseUser) return null
-
-  return getOrCreateUserData(firebaseUser)
-}
-
-export const getAuthenticatedUser = async (): Promise<User | null> => {
   const firebaseUser = await new Promise<FirebaseUser | null>((resolve, reject) => {
     let unsubscribe = () => {}
     unsubscribe = onAuthStateChanged(

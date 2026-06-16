@@ -4,7 +4,6 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { createUiSlice, type UiSlice } from "./ui-store";
 import { createFriendSlice, type FriendSlice } from "#/features/friends/store/friend-store";
-import { persist } from "zustand/middleware";
 
 export type StoreProps = AuthenticationSlice & UiSlice & FriendSlice;
 
