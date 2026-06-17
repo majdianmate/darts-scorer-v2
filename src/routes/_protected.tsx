@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import Sidebar from '#/components/Sidebar/Sidebar'
 import { useStore } from '../../store/store'
-import Header from '#/components/Header/Header'
+import Header, { HeaderProvider, useHeader } from '#/components/Header/Header'
 import { GravityStarsBackground } from '#/components/animate-ui/components/backgrounds/gravity-stars'
 import { cn } from '#/lib/utils'
 import { getAuthenticatedUser } from '#/features/authentication/service/auth-service'
@@ -28,14 +28,24 @@ export const Route = createFileRoute('/_protected')({
 
 function ProtectedLayout() {
   const user = useStore((state) => state.user)
-  const sidebarOpen = useStore((state) => state.sidebarOpen)
   if (!user) return null
+
+  return (
+    <HeaderProvider>
+      <ProtectedLayoutContent />
+    </HeaderProvider>
+  )
+}
+
+function ProtectedLayoutContent() {
+  const sidebarOpen = useStore((state) => state.sidebarOpen)
+  const { header } = useHeader()
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header title="Dashboard" />
+        <Header title={header.title} buttons={header.buttons} />
         <div className="h-full w-full flex-1 bg-background">
           <main
             className={cn(
