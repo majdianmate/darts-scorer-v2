@@ -1,4 +1,4 @@
-import { Link, useParams } from '@tanstack/react-router'
+import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import {
   ArrowLeft,
   Building2,
@@ -12,10 +12,11 @@ import {
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useClub } from '#/features/clubs/hooks/use-club'
-import { Button, buttonVariants } from '#/components/ui/button'
+import { buttonVariants } from '#/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '#/components/ui/scroll-area'
 import { cn } from '#/lib/utils'
+import { usePageHeader } from '#/components/Header/Header'
 import ClubMembers from './ClubMembers'
 import ClubInvitations from './ClubInvitations'
 import ClubSquads from './ClubSquads'
@@ -29,6 +30,7 @@ const Club = () => {
   const { id: clubId } = useParams({
     from: '/_protected/clubs/$id',
   })
+  const navigate = useNavigate()
   const { club, isGetClubLoading, isGetClubError } = useClub(clubId);
   const [activeTab, setActiveTab] = useState<ClubTab>('members')
 
@@ -43,6 +45,42 @@ const Club = () => {
       squads: club.squads.length,
     }
   }, [club])
+
+  const header = useMemo(
+    () => ({
+      title: club?.name ?? 'Club',
+      buttons: [
+        {
+          icon: ArrowLeft,
+          label: 'Clubs',
+          variant: 'ghost' as const,
+          onClick: () => navigate({ to: '/clubs' }),
+        },
+        {
+          icon: Users,
+          label: 'Invite',
+          variant: 'outline' as const,
+          disabled: !club,
+          onClick: () => {
+            setTargetClubId(clubId)
+            setDialogOpen('memberManager', true)
+          },
+        },
+        {
+          icon: Plus,
+          label: 'Squad',
+          disabled: !club,
+          onClick: () => {
+            setTargetClubId(clubId)
+            setDialogOpen('createSquad', true)
+          },
+        },
+      ],
+    }),
+    [club, clubId, navigate, setDialogOpen, setTargetClubId],
+  )
+
+  usePageHeader(header)
 
   if (isGetClubLoading) {
     return (
@@ -73,45 +111,6 @@ const Club = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-5 overflow-hidden">
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-        <Link
-          to="/clubs"
-          className={cn(
-            buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'w-fit gap-2',
-          )}
-        >
-          <ArrowLeft className="size-4" />
-          Back to clubs
-        </Link>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => {
-              setTargetClubId(clubId)
-              setDialogOpen('memberManager', true)
-            }}
-          >
-            <Plus className="size-4" />
-            Add member
-          </Button>
-          <Button
-            size="sm"
-            className="gap-2"
-            onClick={() => {
-              setTargetClubId(clubId)
-              setDialogOpen('createSquad', true)
-            }}
-          >
-            <Plus className="size-4" />
-            Add squad
-          </Button>
-        </div>
-      </div>
-
       <div className="flex shrink-0 flex-col gap-3 rounded-xl border border-border/70 bg-linear-to-br from-muted/30 via-background to-background p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-background/80 shadow-sm">
@@ -143,7 +142,7 @@ const Club = () => {
       </div>
 
       <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
-        <nav className="h-fit w-40 shrink-0 self-start rounded-lg border border-border/70 bg-muted/20 p-2">
+        <nav className="h-fit flex flex-col gap-2 w-40 shrink-0 self-start rounded-lg border border-border/70 bg-muted/20 p-2">
           {[
             {
               value: 'members',
