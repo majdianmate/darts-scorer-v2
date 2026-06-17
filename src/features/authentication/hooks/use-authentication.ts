@@ -1,11 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useStore } from '../../../../store/store'
-import type {
-  AuthSignInCredentials,
-  AuthSignUpCredentials,
-  ResetPasswordCredentials,
-} from '../types/auth-types'
+import type { User } from '../types/user-types'
 import {
   signUpWithCredentials,
   signInWithCredentials,
@@ -13,19 +9,26 @@ import {
   resetPasswordService,
   deleteAccountService,
   signInOrSignUpWithGoogle,
+  initAuthSync,
 } from '../service/auth-service'
 
 export const useAuthentication = () => {
-  const queryClient = useQueryClient()
+  const [user, setUser] = useState<User | null>(null)
+  const [isAuthLoading, setIsAuthLoading] = useState(true)
 
-  const user = useStore((state) => state.user)
-  const setUser = useStore((state) => state.setUser)
-  const clearUser = useStore((state) => state.clearUser)
+  useEffect(() => {
+    const unsubscribe = initAuthSync((nextUser) => {
+      setUser(nextUser)
+      setIsAuthLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   const signUpWithCredentialsMutation = useMutation({
     mutationFn: signUpWithCredentials,
-    onSuccess: (user) => {
-      setUser(user)
+    onSuccess: (createdUser) => {
+      setUser(createdUser)
       toast.success('Signed up successfully')
     },
     onError: () => {
@@ -35,8 +38,7 @@ export const useAuthentication = () => {
 
   const signInOrSignUpWithGoogleMutation = useMutation({
     mutationFn: signInOrSignUpWithGoogle,
-    onSuccess: (user) => {
-      setUser(user)
+    onSuccess: () => {
       toast.success('Signed up with Google successfully')
     },
     onError: () => {
@@ -46,8 +48,8 @@ export const useAuthentication = () => {
 
   const signInWithCredentialsMutation = useMutation({
     mutationFn: signInWithCredentials,
-    onSuccess: (user) => {
-      setUser(user)
+    onSuccess: (signedInUser) => {
+      setUser(signedInUser)
       toast.success('Signed in successfully')
     },
     onError: () => {
@@ -58,7 +60,7 @@ export const useAuthentication = () => {
   const signOutMutation = useMutation({
     mutationFn: signOutService,
     onSuccess: () => {
-      clearUser()
+      setUser(null)
       toast.success('Signed out successfully')
     },
     onError: () => {
@@ -79,8 +81,7 @@ export const useAuthentication = () => {
   const deleteAccountMutation = useMutation({
     mutationFn: deleteAccountService,
     onSuccess: () => {
-      clearUser()
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      setUser(null)
       toast.success('Deleted account successfully')
     },
     onError: () => {
@@ -97,7 +98,8 @@ export const useAuthentication = () => {
     resetPassword: resetPasswordMutation.mutateAsync,
     deleteAccount: deleteAccountMutation.mutateAsync,
 
-    isLoading: 
+    isLoading:
+      isAuthLoading ||
       signUpWithCredentialsMutation.isPending ||
       signInOrSignUpWithGoogleMutation.isPending ||
       signInWithCredentialsMutation.isPending ||

@@ -1,18 +1,17 @@
 import { useAuthentication } from '../hooks/use-authentication';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import React, { type JSX, type SVGProps, useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from 'sonner';
-import { useStore } from '../../../../store/store';
 
 const SignIn = () => {
   const redirectTo = "/dashboard";
-  const user = useStore((state) => state.user);
   const navigate = useNavigate();
-  const { signInWithCredentials, signInOrSignUpWithGoogle } = useAuthentication();
+  const { user, signInWithCredentials, signInOrSignUpWithGoogle } =
+    useAuthentication();
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -30,12 +29,6 @@ const SignIn = () => {
       setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (user) {
-      navigate({ href: redirectTo });
-    }
-  }, [user, navigate]);
 
   const handleGoogleLogin = async () => {
     try {
