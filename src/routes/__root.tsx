@@ -10,11 +10,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import appCss from '../styles.css?url'
 import { Toaster } from 'sonner'
 import type { QueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
-import { useStore } from '../../store/store'
-import { initAuthSync } from '#/features/authentication/service/auth-service'
-import { ThemeProvider } from '../../providers/theme-provider'
-import { DialogProvider } from '../../providers/dialog-provider'
+import type { ReactNode } from 'react'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -34,30 +30,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootComponent() {
-  const setUser = useStore((state) => state.setUser)
-  const clearUser = useStore((state) => state.clearUser)
-
-  useEffect(() => {
-    const unsub = initAuthSync((user) => {
-      if (user) setUser(user)
-      else clearUser()
-    })
-    return () => unsub()
-  }, [])
-
-  return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <DialogProvider>
-        <div className="relative z-[2] min-h-dvh w-full">
-          <Outlet />
-        </div>
-      </DialogProvider>
-      <Toaster />
-    </ThemeProvider>
-  )
+  return <Outlet />
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="h-full">
       <head>
