@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ title, buttons }) => {
       <h1 className="text-lg font-semibold text-foreground">{title}</h1>
       <div className="flex items-center gap-2">
         {buttons?.map(({ icon: Icon, label, ...button }) => (
-          <Button key={label} {...button}>
+          <Button key={label} {...button} size="sm" className="cursor-pointer" onClick={() => button.onClick()}>
             <Icon className="size-4" />
             {label}
           </Button>
