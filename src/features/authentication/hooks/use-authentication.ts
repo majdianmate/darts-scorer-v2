@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { User } from '../types/user-types'
@@ -13,22 +13,29 @@ import {
 } from '../service/auth-service'
 
 export const useAuthentication = () => {
-  const [user, setUser] = useState<User | null>(null)
+  const queryClient = useQueryClient()
   const [isAuthLoading, setIsAuthLoading] = useState(true)
+
+  const { data: user = null } = useQuery<User | null>({
+    queryKey: ['user'],
+    queryFn: async () => queryClient.getQueryData<User | null>(['user']) ?? null,
+    initialData: null,
+    staleTime: Infinity,
+  })
 
   useEffect(() => {
     const unsubscribe = initAuthSync((nextUser) => {
-      setUser(nextUser)
+      queryClient.setQueryData(['user'], nextUser)
       setIsAuthLoading(false)
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [queryClient])
 
   const signUpWithCredentialsMutation = useMutation({
     mutationFn: signUpWithCredentials,
     onSuccess: (createdUser) => {
-      setUser(createdUser)
+      queryClient.setQueryData(['user'], createdUser)
       toast.success('Signed up successfully')
     },
     onError: () => {
@@ -49,7 +56,7 @@ export const useAuthentication = () => {
   const signInWithCredentialsMutation = useMutation({
     mutationFn: signInWithCredentials,
     onSuccess: (signedInUser) => {
-      setUser(signedInUser)
+      queryClient.setQueryData(['user'], signedInUser)
       toast.success('Signed in successfully')
     },
     onError: () => {
@@ -60,7 +67,7 @@ export const useAuthentication = () => {
   const signOutMutation = useMutation({
     mutationFn: signOutService,
     onSuccess: () => {
-      setUser(null)
+      queryClient.setQueryData(['user'], null)
       toast.success('Signed out successfully')
     },
     onError: () => {
@@ -81,7 +88,7 @@ export const useAuthentication = () => {
   const deleteAccountMutation = useMutation({
     mutationFn: deleteAccountService,
     onSuccess: () => {
-      setUser(null)
+      queryClient.setQueryData(['user'], null)
       toast.success('Deleted account successfully')
     },
     onError: () => {

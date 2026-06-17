@@ -11,6 +11,7 @@ import appCss from '../styles.css?url'
 import { Toaster } from 'sonner'
 import type { QueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
+import { ThemeProvider } from '../../providers/theme-provider'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -35,23 +36,25 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body className="h-screen w-screen overflow-hidden">
-        <Toaster />
-        {children}
-        <TanStackDevtools
-          config={{ position: 'bottom-right' }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            TanStackQueryDevtools,
-          ]}
-        />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Toaster />
+          {children}
+          <TanStackDevtools
+            config={{ position: 'bottom-right' }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+              TanStackQueryDevtools,
+            ]}
+          />
+        </ThemeProvider>
         <Scripts />
       </body>
     </html>

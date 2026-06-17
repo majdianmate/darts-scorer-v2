@@ -5,11 +5,11 @@ import Header, { HeaderProvider, useHeader } from '#/components/Header/Header'
 import { GravityStarsBackground } from '#/components/animate-ui/components/backgrounds/gravity-stars'
 import { cn } from '#/lib/utils'
 import { getAuthenticatedUser } from '#/features/authentication/service/auth-service'
+import { useAuthentication } from '#/features/authentication/hooks/use-authentication'
 
 export const Route = createFileRoute('/_protected')({
   beforeLoad: async ({ context }) => {
-    const user =
-      context.queryClient.getQueryData(['user']) ?? useStore.getState().user
+    const user = context.queryClient.getQueryData(['user'])
 
     if (user) return
     if (typeof window === 'undefined') return
@@ -20,15 +20,14 @@ export const Route = createFileRoute('/_protected')({
       throw redirect({ to: '/sign-in' })
     }
 
-    useStore.getState().setUser(authenticatedUser)
     context.queryClient.setQueryData(['user'], authenticatedUser)
   },
   component: ProtectedLayout,
 })
 
 function ProtectedLayout() {
-  const user = useStore((state) => state.user)
-  if (!user) return null
+  const { user, isLoading } = useAuthentication()
+  if (isLoading || !user) return null
 
   return (
     <HeaderProvider>

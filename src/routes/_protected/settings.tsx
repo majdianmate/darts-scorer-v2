@@ -1,3 +1,4 @@
+import Settings from '#/features/settings/settings'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_protected/settings')({
@@ -5,5 +6,5 @@ export const Route = createFileRoute('/_protected/settings')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/_protected/settings"!</div>
+  return <Settings />
 }

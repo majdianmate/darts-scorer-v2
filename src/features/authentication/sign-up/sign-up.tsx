@@ -1,6 +1,5 @@
 import { useAuthentication } from '../hooks/use-authentication'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Link, useNavigate } from '@tanstack/react-router'
 import React, { type JSX, type SVGProps, useEffect, useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
