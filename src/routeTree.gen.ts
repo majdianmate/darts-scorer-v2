@@ -22,6 +22,8 @@ import { Route as ProtectedClubsRouteImport } from './routes/_protected/clubs'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as ProtectedClubsIndexRouteImport } from './routes/_protected/clubs/index'
+import { Route as ProtectedClubsIdRouteImport } from './routes/_protected/clubs/$id'
 
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
@@ -87,13 +89,23 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedClubsIndexRoute = ProtectedClubsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProtectedClubsRoute,
+} as any)
+const ProtectedClubsIdRoute = ProtectedClubsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ProtectedClubsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/clubs': typeof ProtectedClubsRoute
+  '/clubs': typeof ProtectedClubsRouteWithChildren
   '/dashboard': typeof ProtectedDashboardRoute
   '/feedback': typeof ProtectedFeedbackRoute
   '/friends': typeof ProtectedFriendsRoute
@@ -101,13 +113,14 @@ export interface FileRoutesByFullPath {
   '/match': typeof ProtectedMatchRoute
   '/patch_notes': typeof ProtectedPatch_notesRoute
   '/settings': typeof ProtectedSettingsRoute
+  '/clubs/$id': typeof ProtectedClubsIdRoute
+  '/clubs/': typeof ProtectedClubsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/clubs': typeof ProtectedClubsRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/feedback': typeof ProtectedFeedbackRoute
   '/friends': typeof ProtectedFriendsRoute
@@ -115,6 +128,8 @@ export interface FileRoutesByTo {
   '/match': typeof ProtectedMatchRoute
   '/patch_notes': typeof ProtectedPatch_notesRoute
   '/settings': typeof ProtectedSettingsRoute
+  '/clubs/$id': typeof ProtectedClubsIdRoute
+  '/clubs': typeof ProtectedClubsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -123,7 +138,7 @@ export interface FileRoutesById {
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
-  '/_protected/clubs': typeof ProtectedClubsRoute
+  '/_protected/clubs': typeof ProtectedClubsRouteWithChildren
   '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/_protected/feedback': typeof ProtectedFeedbackRoute
   '/_protected/friends': typeof ProtectedFriendsRoute
@@ -131,6 +146,8 @@ export interface FileRoutesById {
   '/_protected/match': typeof ProtectedMatchRoute
   '/_protected/patch_notes': typeof ProtectedPatch_notesRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
+  '/_protected/clubs/$id': typeof ProtectedClubsIdRoute
+  '/_protected/clubs/': typeof ProtectedClubsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,13 +164,14 @@ export interface FileRouteTypes {
     | '/match'
     | '/patch_notes'
     | '/settings'
+    | '/clubs/$id'
+    | '/clubs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/forgot-password'
     | '/sign-in'
     | '/sign-up'
-    | '/clubs'
     | '/dashboard'
     | '/feedback'
     | '/friends'
@@ -161,6 +179,8 @@ export interface FileRouteTypes {
     | '/match'
     | '/patch_notes'
     | '/settings'
+    | '/clubs/$id'
+    | '/clubs'
   id:
     | '__root__'
     | '/'
@@ -176,6 +196,8 @@ export interface FileRouteTypes {
     | '/_protected/match'
     | '/_protected/patch_notes'
     | '/_protected/settings'
+    | '/_protected/clubs/$id'
+    | '/_protected/clubs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -279,11 +301,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/clubs/': {
+      id: '/_protected/clubs/'
+      path: '/'
+      fullPath: '/clubs/'
+      preLoaderRoute: typeof ProtectedClubsIndexRouteImport
+      parentRoute: typeof ProtectedClubsRoute
+    }
+    '/_protected/clubs/$id': {
+      id: '/_protected/clubs/$id'
+      path: '/$id'
+      fullPath: '/clubs/$id'
+      preLoaderRoute: typeof ProtectedClubsIdRouteImport
+      parentRoute: typeof ProtectedClubsRoute
+    }
   }
 }
 
+interface ProtectedClubsRouteChildren {
+  ProtectedClubsIdRoute: typeof ProtectedClubsIdRoute
+  ProtectedClubsIndexRoute: typeof ProtectedClubsIndexRoute
+}
+
+const ProtectedClubsRouteChildren: ProtectedClubsRouteChildren = {
+  ProtectedClubsIdRoute: ProtectedClubsIdRoute,
+  ProtectedClubsIndexRoute: ProtectedClubsIndexRoute,
+}
+
+const ProtectedClubsRouteWithChildren = ProtectedClubsRoute._addFileChildren(
+  ProtectedClubsRouteChildren,
+)
+
 interface ProtectedRouteChildren {
-  ProtectedClubsRoute: typeof ProtectedClubsRoute
+  ProtectedClubsRoute: typeof ProtectedClubsRouteWithChildren
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
   ProtectedFeedbackRoute: typeof ProtectedFeedbackRoute
   ProtectedFriendsRoute: typeof ProtectedFriendsRoute
@@ -294,7 +344,7 @@ interface ProtectedRouteChildren {
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
-  ProtectedClubsRoute: ProtectedClubsRoute,
+  ProtectedClubsRoute: ProtectedClubsRouteWithChildren,
   ProtectedDashboardRoute: ProtectedDashboardRoute,
   ProtectedFeedbackRoute: ProtectedFeedbackRoute,
   ProtectedFriendsRoute: ProtectedFriendsRoute,

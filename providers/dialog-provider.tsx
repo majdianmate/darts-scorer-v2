@@ -6,6 +6,12 @@ import {
 } from 'react'
 import { useStore } from '../store/store'
 import type { DialogType } from '../store/ui-store'
+import ClubEditor from '../src/features/clubs/components/ClubEditor/ClubEditor'
+import CreateClubDialog from '../src/features/clubs/components/ClubCreator/CreateClubDialog'
+import ClubInvites from '../src/features/clubs/components/ClubInvites/ClubInvites'
+import MemberManagerDialog from '../src/features/clubs/components/MemberManager/MemberManagerDialog'
+import SquadCreator from '../src/features/clubs/components/SquadSystem/SquadCreator/SquadCreator'
+import SquadEditor from '../src/features/clubs/components/SquadSystem/SquadEditor/SquadEditor'
 
 interface DialogContextValue {
   dialogs: Record<DialogType, boolean>
@@ -33,7 +39,18 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   )
 
   return (
-    <DialogContext.Provider value={value}>{children}</DialogContext.Provider>
+    <DialogContext.Provider value={value}>
+      {children}
+      <ClubInvites
+        open={dialogs.clubInvites}
+        onOpenChange={(open) => setDialogOpen('clubInvites', open)}
+      />
+      <CreateClubDialog />
+      <MemberManagerDialog />
+      <ClubEditor />
+      <SquadCreator />
+      <SquadEditor />
+    </DialogContext.Provider>
   )
 }
 

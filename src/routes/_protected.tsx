@@ -43,17 +43,17 @@ function ProtectedLayoutContent() {
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header title={header.title} buttons={header.buttons} />
-        <div className="h-full w-full flex-1 bg-background">
+        <div className="min-h-0 w-full flex-1 bg-background">
           <main
             className={cn(
-              'relative isolate h-full w-full min-w-0 flex-1 overflow-auto bg-background transition-[border-radius] duration-300',
+              'relative h-full overflow-hidden bg-background transition-[border-radius] duration-300',
               sidebarOpen && 'rounded-tl-xl',
             )}
           >
             <GravityStarsBackground className="absolute inset-0 z-0" />
-            <div className="relative z-10">
+            <div className="relative z-10 h-full min-h-0 overflow-hidden p-4">
               <Outlet />
             </div>
           </main>
