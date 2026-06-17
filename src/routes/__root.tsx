@@ -14,6 +14,7 @@ import { useEffect } from 'react'
 import { useStore } from '../../store/store'
 import { initAuthSync } from '#/features/authentication/service/auth-service'
 import { ThemeProvider } from '../../providers/theme-provider'
+import { DialogProvider } from '../../providers/dialog-provider'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -46,9 +47,11 @@ function RootComponent() {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="relative z-[2] min-h-dvh w-full">
-        <Outlet />
-      </div>
+      <DialogProvider>
+        <div className="relative z-[2] min-h-dvh w-full">
+          <Outlet />
+        </div>
+      </DialogProvider>
       <Toaster />
     </ThemeProvider>
   )
